@@ -44,11 +44,11 @@ Available commands: help, clear, video, stop, about, manifesto, project, minting
 **Usage**: `stop`
 
 ### 5. about
-**Description**: 
+**Description**: Provides an overview of SIMPLETS and its mission.
 **Usage**: `about`
 
 ### 6. manifesto
-**Description**: 
+**Description**: Reveals the core principles and philosophy behind SIMPLETS.
 **Usage**: `manifesto`
 
 ### 7. project
@@ -63,7 +63,7 @@ community at the intersection of identity and innovation.
 **Usage**: `project`
 
 ### 8. minting
-**Description**: 
+**Description**: Details about the SIMPLETS NFT minting process.
 **Usage**: `minting`
 
 ### 9. roadmap
@@ -93,11 +93,11 @@ Potential airdrops and future token launch on the way
 **Usage**: `roadmap`
 
 ### 10. team
-**Description**: 
+**Description**: Information about the SIMPLETS team.
 **Usage**: `team`
 
 ### 11. links
-**Description**: 
+**Description**: Official SIMPLETS contact and social media channels.
 **Usage**: `links`
 
 ## Terminal Interactions
