@@ -3,7 +3,11 @@ const CONFIG = {
     version: 'v0.01',
     username: 'anonymous',
     hostname: 'simplets',
-    availableCommands: ['help', 'version', 'clear']
+    availableCommands: [
+        'help', 'clear', 'video', 'stop', 
+        'about', 'manifesto', 'project', 'minting', 
+        'roadmap', 'team', 'links'
+    ]
 };
 
 // Utility Functions
@@ -67,17 +71,22 @@ const WaveAnimation = {
 
             // Reduced configuration
             const numRows = Math.max(40, Math.ceil(window.innerHeight / 25));
-            const numCols = 12;
+            const numCols = 12; // Ensure 12 columns for both boxes
             const cellWidth = 25;
             const cellHeight = 25;
 
             // Precompute gradient intensities
             const gradientIntensities = [];
             for (let x = 0; x < numCols; x++) {
-                gradientIntensities.push(side === 'left' 
-                    ? 1 - (x / (numCols - 1)) 
-                    : x / (numCols - 1)
-                );
+                if (side === 'left') {
+                    // Left box: white on left side, progressively darker towards center
+                    // Use a softer power function to make the darkening less pronounced
+                    gradientIntensities.push(Math.pow(1 - (x / (numCols - 1)), 1.5));
+                } else {
+                    // Right box: dark on left side, progressively whiter towards right
+                    // Use a softer power function to make the darkening less pronounced
+                    gradientIntensities.push(Math.pow(x / (numCols - 1), 1.5));
+                }
             }
 
             // Create text elements with performance optimization
@@ -120,7 +129,7 @@ const WaveAnimation = {
                         const text = textElements[index];
                         
                         // Reduced randomization frequency
-                        if (Math.random() < 0.0375) {
+                        if (Math.random() < 0.0125) {
                             const char = Math.random() > 0.3 
                                 ? waveChars[Math.floor(Math.random() * waveChars.length)]
                                 : ' ';
@@ -167,11 +176,172 @@ const TerminalCommands = {
                 return `Available commands: ${CONFIG.availableCommands.map(cmd => 
                     `<span class="terminal-command">${cmd}</span>`
                 ).join(', ')}`;
-            case 'version':
-                return `SIMPLETS ${CONFIG.version}`;
             case 'clear':
                 document.getElementById('terminal-output').innerHTML = '';
                 return '';
+            case 'stop':
+                // Remove video and overlay
+                const existingVideo = document.querySelector('.terminal-background-video');
+                const existingOverlay = document.querySelector('.video-text-overlay');
+                if (existingVideo) {
+                    existingVideo.remove();
+                    existingVideo.pause();
+                }
+                if (existingOverlay) {
+                    existingOverlay.remove();
+                }
+                return 'Video stopped. Returning to normal CLI view.';
+            case 'video':
+                // Remove any existing background video
+                const currentVideo = document.querySelector('.terminal-background-video');
+                const currentOverlay = document.querySelector('.video-text-overlay');
+                if (currentVideo) {
+                    currentVideo.remove();
+                    currentVideo.pause();
+                }
+                if (currentOverlay) {
+                    currentOverlay.remove();
+                }
+
+                // Create video element
+                const video = document.createElement('video');
+                video.src = 'video/SIMPLETS_PROMO.m4v';
+                video.classList.add('terminal-background-video');
+                video.autoplay = true;
+                video.loop = false; // Disable looping
+                video.muted = false;
+                video.controls = true;
+
+                // Optional text parameter
+                const textParam = command.split(' ').slice(1).join(' ');
+                let textOverlay = null;
+                if (textParam) {
+                    textOverlay = document.createElement('div');
+                    textOverlay.classList.add('video-text-overlay');
+                    textOverlay.textContent = textParam;
+                }
+
+                // Append to terminal
+                document.getElementById('terminal').appendChild(video);
+                if (textOverlay) {
+                    document.getElementById('terminal').appendChild(textOverlay);
+                }
+
+                // Add event listener to handle video end
+                video.addEventListener('ended', () => {
+                    video.remove();
+                    if (textOverlay) {
+                        textOverlay.remove();
+                    }
+                });
+
+                // Start video with error handling
+                video.play().catch(error => {
+                    console.error('Video playback failed:', error);
+                    return 'Failed to play video. Check console for details.';
+                });
+
+                return textParam 
+                    ? `Playing video with overlay: "${textParam}"` 
+                    : 'Playing video in background...';
+            case 'about':
+                return `
+<strong>SIMPLETS: Redefining Terminal Experience</strong>
+
+SIMPLETS is an innovative terminal interface that blends cutting-edge technology 
+with a minimalist, immersive design. Our mission is to transform how developers 
+and tech enthusiasts interact with their digital environment.
+                `;
+            
+            case 'manifesto':
+                return `
+<strong>SIMPLETS Manifesto</strong>
+
+1. <span class="terminal-command">Simplicity</span>: Elegant, intuitive interfaces
+2. <span class="terminal-command">Minimalism</span>: Removing unnecessary complexity
+3. <span class="terminal-command">Innovation</span>: Pushing boundaries of terminal design
+4. <span class="terminal-command">Accessibility</span>: Making tech more approachable
+5. <span class="terminal-command">Creativity</span>: Transforming functional into beautiful
+
+We believe that technology should inspire, not intimidate.
+                `;
+            
+            case 'project':
+                return `
+<strong>SIMPLETS Project Description</strong>
+
+SIMPLETS is a multichain web3 brand
+
+a pseudonym supportive community
+aim to boost pseudonym contributors in web3 space
+
+A web3 brand empowering pseudonymous contributors, building a supportive 
+community at the intersection of identity and innovation.
+                `;
+            
+            case 'minting':
+                return `
+<strong>SIMPLETS Minting</strong>
+
+- <span class="terminal-command">Total Supply</span>: 10,000 unique terminal interfaces
+- <span class="terminal-command">Mint Price</span>: 0.069 ETH
+- <span class="terminal-command">Blockchain</span>: Ethereum
+- <span class="terminal-command">Smart Contract</span>: In development
+- <span class="terminal-command">Whitelist</span>: Coming soon
+
+Minting will grant exclusive access to advanced terminal features.
+                `;
+            
+            case 'roadmap':
+                return `
+<strong>SIMPLETS Roadmap</strong>
+
+\`\`\`
+SIMPLETS Roadmap Tree:
+├── NFTs
+│   └── Initial Collection Launch
+├── Community
+│   ├── Guild.xyz Integration
+│   └── DAO Setup
+├── Infrastructure
+│   ├── Marketplace Development
+│   └── Custom Swarm Network (Eliza OS)
+├── Content
+│   ├── Podcasts
+│   ├── Workshops
+│   └── Media Hacks
+├── Ecosystem
+│   └── Strategic Partnerships
+└── Tokenomics
+    ├── Potential Airdrops
+    └── Future Token Launch
+\`\`\`
+
+Potential airdrops and future token launch on the way
+                `;
+            
+            case 'team':
+                return `
+<strong>SIMPLETS Team</strong>
+
+- <span class="terminal-command">Founder</span>: Anonymous Developer (0xABCD...)
+- <span class="terminal-command">Lead Designer</span>: UI/UX Minimalist
+- <span class="terminal-command">Lead Developer</span>: Full-Stack Innovator
+- <span class="terminal-command">Community Manager</span>: Tech Enthusiast
+
+We are a collective of developers passionate about reimagining digital interfaces.
+                `;
+            
+            case 'links':
+                return `
+<strong>SIMPLETS Links</strong>
+
+- <span class="terminal-command">Website</span>: https://simplets.tech
+- <span class="terminal-command">GitHub</span>: https://github.com/simplets-git
+- <span class="terminal-command">Twitter</span>: @SIMPLETS_tech
+- <span class="terminal-command">Discord</span>: discord.gg/simplets
+- <span class="terminal-command">Email</span>: contact@simplets.tech
+                `;
             default:
                 return `Command not found: ${command}`;
         }
@@ -193,7 +363,7 @@ const TerminalInput = {
 
         const promptLine = Utils.createElement('div', ['prompt-line']);
         promptLine.innerHTML = `
-            <span class="user-info">${CONFIG.username}@${CONFIG.hostname}</span>:
+            <span class="user-info">[${CONFIG.username}]</span>:
             <span class="path">~</span>$ 
             <span class="command-line" contenteditable="true"></span>
         `;
@@ -218,7 +388,7 @@ const TerminalInput = {
                 const responseLine = Utils.createElement('div');
                 const response = TerminalCommands.process(command);
                 if (response) {
-                    responseLine.innerHTML = response;
+                    responseLine.innerHTML = response.replace(/\n/g, '<br>');
                     terminalOutput.appendChild(responseLine);
                 }
 
