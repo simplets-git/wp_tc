@@ -192,9 +192,18 @@ const TerminalCommands = {
                 }
                 return 'Video stopped. Returning to normal CLI view.';
             case 'video':
+                // Check if the theme is light
+                const isLightTheme = document.body.classList.contains('light-theme');
+                
+                if (isLightTheme) {
+                    return 'WARNING: Please switch to dark theme before playing video. Use theme toggle to switch.';
+                }
+
                 // Remove any existing background video
                 const currentVideo = document.querySelector('.terminal-background-video');
                 const currentOverlay = document.querySelector('.video-text-overlay');
+                const terminalLogo = document.getElementById('terminal-logo');
+
                 if (currentVideo) {
                     currentVideo.remove();
                     currentVideo.pause();
@@ -203,12 +212,17 @@ const TerminalCommands = {
                     currentOverlay.remove();
                 }
 
-                // Create video element
+                // Hide theme toggle button when video starts
+                if (terminalLogo) {
+                    terminalLogo.style.display = 'none';
+                }
+
+                // Create video element with fade-in
                 const video = document.createElement('video');
                 video.src = 'video/SIMPLETS_PROMO.m4v';
                 video.classList.add('terminal-background-video');
                 video.autoplay = true;
-                video.loop = false; // Disable looping
+                video.loop = false;
                 video.muted = false;
                 video.controls = true;
 
@@ -227,17 +241,41 @@ const TerminalCommands = {
                     document.getElementById('terminal').appendChild(textOverlay);
                 }
 
+                // Trigger reflow to ensure animation works
+                video.offsetWidth;
+                video.style.opacity = '1';
+
                 // Add event listener to handle video end
                 video.addEventListener('ended', () => {
-                    video.remove();
+                    // Fade out video before removing
+                    video.style.opacity = '0';
                     if (textOverlay) {
-                        textOverlay.remove();
+                        textOverlay.style.opacity = '0';
                     }
+
+                    // Remove after fade out
+                    setTimeout(() => {
+                        video.remove();
+                        if (textOverlay) {
+                            textOverlay.remove();
+                        }
+
+                        // Restore theme toggle button when video ends
+                        if (terminalLogo) {
+                            terminalLogo.style.display = 'block';
+                        }
+                    }, 1000);
                 });
 
                 // Start video with error handling
                 video.play().catch(error => {
                     console.error('Video playback failed:', error);
+                    
+                    // Ensure theme toggle button is restored if video fails
+                    if (terminalLogo) {
+                        terminalLogo.style.display = 'block';
+                    }
+                    
                     return 'Failed to play video. Check console for details.';
                 });
 
@@ -584,4 +622,65 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Transition after 4 seconds
     setTimeout(transitionToTerminal, 4000);
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    const chatMessages = document.getElementById('chat-messages');
+    const userInput = document.getElementById('user-input');
+    const sendBtn = document.getElementById('send-btn');
+    const videoElement = document.querySelector('.terminal-background-video');
+
+    // Theme detection function
+    function isLightTheme() {
+        return document.body.classList.contains('light-theme');
+    }
+
+    sendBtn.addEventListener('click', sendMessage);
+    userInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') sendMessage();
+    });
+
+    function sendMessage() {
+        const message = userInput.value.trim().toLowerCase();
+        
+        if (message === 'video') {
+            if (isLightTheme()) {
+                // Warning message for light theme
+                const warningMessage = 'WARNING: Please switch to dark theme before playing video. Use /theme dark command.';
+                addMessageToChatContainer(warningMessage, 'system-warning');
+                
+                // Prevent video from playing
+                if (videoElement) {
+                    videoElement.style.display = 'none';
+                }
+                
+                userInput.value = '';
+                return;
+            }
+            
+            // Normal video playback logic for dark theme
+            addMessageToChatContainer('Playing video...', 'system');
+            if (videoElement) {
+                videoElement.style.display = 'block';
+            }
+        } else {
+            // Existing message handling logic
+            addMessageToChatContainer(message, 'user');
+            
+            // Simulate AI response
+            setTimeout(() => {
+                addMessageToChatContainer('Processing your request...', 'ai');
+            }, 1000);
+        }
+        
+        userInput.value = '';
+    }
+
+    function addMessageToChatContainer(message, sender) {
+        const messageElement = document.createElement('div');
+        messageElement.classList.add('message', sender);
+        messageElement.textContent = message;
+        chatMessages.appendChild(messageElement);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
 }); 
