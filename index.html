@@ -2,22 +2,23 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>SIMPLETS Terminal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIMPLETS Terminal v0.01</title>
     <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inconsolata:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <div id="terminal">
-        <div id="terminal-header">
-            <div id="terminal-logo" class="theme-toggle">
-                <!-- Theme toggle logic -->
+        <div id="loading-screen">
+            <div id="loading-container">
+                <pre id="ascii-art"></pre>
+                <div id="loading-text">Loading SIMPLETS v0.01...</div>
             </div>
         </div>
-        <div id="chat-container">
-            <div id="chat-messages"></div>
-            <div id="input-area">
-                <input type="text" id="user-input" placeholder="Enter command...">
-                <button id="send-btn">Send</button>
-            </div>
+        <div id="terminal-output"></div>
+        <div id="terminal-input-area">
+            <span class="prompt">$</span>
+            <input type="text" id="terminal-input" autocomplete="off">
         </div>
     </div>
     <script src="script.js"></script>
