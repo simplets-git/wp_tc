@@ -202,8 +202,6 @@ const TerminalCommands = {
                 // Remove any existing background video
                 const currentVideo = document.querySelector('.terminal-background-video');
                 const currentOverlay = document.querySelector('.video-text-overlay');
-                const terminalLogo = document.getElementById('terminal-logo');
-
                 if (currentVideo) {
                     currentVideo.remove();
                     currentVideo.pause();
@@ -212,17 +210,12 @@ const TerminalCommands = {
                     currentOverlay.remove();
                 }
 
-                // Hide theme toggle button when video starts
-                if (terminalLogo) {
-                    terminalLogo.style.display = 'none';
-                }
-
-                // Create video element with fade-in
+                // Create video element
                 const video = document.createElement('video');
                 video.src = 'video/SIMPLETS_PROMO.m4v';
                 video.classList.add('terminal-background-video');
                 video.autoplay = true;
-                video.loop = false;
+                video.loop = false; // Disable looping
                 video.muted = false;
                 video.controls = true;
 
@@ -241,41 +234,17 @@ const TerminalCommands = {
                     document.getElementById('terminal').appendChild(textOverlay);
                 }
 
-                // Trigger reflow to ensure animation works
-                video.offsetWidth;
-                video.style.opacity = '1';
-
                 // Add event listener to handle video end
                 video.addEventListener('ended', () => {
-                    // Fade out video before removing
-                    video.style.opacity = '0';
+                    video.remove();
                     if (textOverlay) {
-                        textOverlay.style.opacity = '0';
+                        textOverlay.remove();
                     }
-
-                    // Remove after fade out
-                    setTimeout(() => {
-                        video.remove();
-                        if (textOverlay) {
-                            textOverlay.remove();
-                        }
-
-                        // Restore theme toggle button when video ends
-                        if (terminalLogo) {
-                            terminalLogo.style.display = 'block';
-                        }
-                    }, 1000);
                 });
 
                 // Start video with error handling
                 video.play().catch(error => {
                     console.error('Video playback failed:', error);
-                    
-                    // Ensure theme toggle button is restored if video fails
-                    if (terminalLogo) {
-                        terminalLogo.style.display = 'block';
-                    }
-                    
                     return 'Failed to play video. Check console for details.';
                 });
 
