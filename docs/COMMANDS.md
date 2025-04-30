@@ -3,6 +3,32 @@
 ## Overview
 SIMPLETS provides a unique, minimalist terminal interface with a set of informative and interactive commands. This documentation outlines the available commands and their functionalities.
 
+## Basic Commands
+- `/help`: Show available commands
+- `/clear`: Clear chat history
+- `/reset`: Reset conversation context
+
+## Theme Commands
+- `/theme dark`: Switch to dark theme
+- `/theme light`: Switch to light theme
+
+## Media Commands
+- `video`: Play promotional video
+  - **Note**: Video can only be played in dark theme
+  - Prevents theme switching during video playback
+  - Includes fade-in/fade-out effects
+
+## Advanced Commands
+- `/mode [mode]`: Switch AI mode (e.g., coding, creative, analytical)
+- `/save`: Save current conversation
+- `/load [conversation_id]`: Load a previous conversation
+
+## Video Playback Guidelines
+- Only available in dark theme
+- Theme toggle button is hidden during video
+- Smooth fade-in and fade-out animations
+- Video overlay can be customized
+
 ## Command List
 - `help`: Display all available commands
 - `clear`: Clear the terminal output
