@@ -365,7 +365,7 @@ We are a collective of developers passionate about reimagining digital interface
         this.stopVideo();
         Utils.hideThemeButton();
         const video = document.createElement('video');
-        video.src = 'video/SIMPLETS_PROMO.m4v';
+        video.src = 'video/SIMPLETS.m4v';
         video.className = 'terminal-background-video';
         video.style.opacity = '0';
         video.style.transition = 'opacity 1s ease';
