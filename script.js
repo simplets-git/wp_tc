@@ -217,7 +217,9 @@ const TerminalCommands = {
                     `<span class="terminal-command">${cmd}</span>`
                 ).join(', ')}`;
             case 'clear':
-                document.getElementById('terminal-output').innerHTML = '';
+                // Keep the welcome message after clearing
+                const terminalOutput = document.getElementById('terminal-output');
+                terminalOutput.innerHTML = '<div class="welcome-line">Welcome to the abyss. Type <span class="terminal-command">help</span> to interact.</div>';
                 return '';
             case 'stop':
                 this.stopVideo();
@@ -365,7 +367,7 @@ We are a collective of developers passionate about reimagining digital interface
         this.stopVideo();
         Utils.hideThemeButton();
         const video = document.createElement('video');
-        video.src = 'video/SIMPLETS.m4v';
+        video.src = 'video/SMP_vid.m4v';
         video.className = 'terminal-background-video';
         video.style.opacity = '0';
         video.style.transition = 'opacity 1s ease';
@@ -514,7 +516,7 @@ const TerminalInput = {
 // Terminal Configuration
 // =====================
 const CONFIG = {
-    version: 'v0.03',
+    version: 'v0.4',
     username: 'anonymous',
     hostname: 'simplets',
     availableCommands: [
