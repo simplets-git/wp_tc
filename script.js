@@ -300,8 +300,8 @@ Minting will grant exclusive access to advanced terminal features.
 │   └── Initial Collection Launch
 ├── Community
 │   ├── Guild.xyz Integration
-│   ├── Raves
-│   └── DAO Setup
+│   ├── DAO Setup
+│   └── Raves
 ├── Infrastructure
 │   ├── Custom Marketplace Development
 │   └── Swarm Network (Eliza OS)
@@ -341,8 +341,16 @@ We are a collective of developers passionate about reimagining digital interface
             case 'legal':
                 return `
 <strong>Legal Notice</strong>
-
-SIMPLETS is a creative digital project. All content is for informational and entertainment purposes only. No part of this project constitutes financial advice, legal advice, or a solicitation to buy or sell any asset. Use at your own risk. For inquiries, contact the team directly.
+<ul>
+<li><b>SIMPLETS is a VPL (Virtual Public License) project.</b></li>
+<li>The project is primarily community-led; direction and development may evolve based on collective input.</li>
+<li>By using, interacting with, minting, or contributing to SIMPLETS, you do so entirely at your own risk.</li>
+<li>There are no guarantees, warranties, or promises of functionality, value, or outcome.</li>
+<li>"Code is law": all interactions and contributions are governed by the codebase as it exists on-chain and in this repository.</li>
+<li>No individual or entity is liable for any loss, damages, or consequences arising from your participation.</li>
+<li>This is an experimental, creative digital project. Not financial or legal advice.</li>
+</ul>
+For questions or concerns, reach out to the community or project maintainers directly.
                 `;
             default:
                 return `Command not found: ${command}`;
