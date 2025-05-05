@@ -295,28 +295,27 @@ Minting will grant exclusive access to advanced terminal features.
                 return `
 <strong>SIMPLETS Roadmap</strong>
 
-\`\`\`
-SIMPLETS Roadmap Tree:
+<pre>SIMPLETS Roadmap Tree:
 ├── NFTs
 │   └── Initial Collection Launch
 ├── Community
 │   ├── Guild.xyz Integration
+│   ├── Raves
 │   └── DAO Setup
 ├── Infrastructure
-│   ├── Marketplace Development
-│   └── Custom Swarm Network (Eliza OS)
+│   ├── Custom Marketplace Development
+│   └── Swarm Network (Eliza OS)
 ├── Content
 │   ├── Podcasts
-│   ├── Workshops
+│   ├── Merch
 │   └── Media Hacks
 ├── Ecosystem
 │   └── Strategic Partnerships
 └── Tokenomics
     ├── Potential Airdrops
-    └── Future Token Launch
-\`\`\`
+    └── Future Coin Launch</pre>
 
-Potential airdrops and future token launch on the way
+Potential airdrops, merch, raves, and future coin launch on the way
                 `;
             case 'team':
                 return `
@@ -338,6 +337,12 @@ We are a collective of developers passionate about reimagining digital interface
 - <span class="terminal-command">Twitter</span>: @SIMPLETS_tech
 - <span class="terminal-command">Discord</span>: discord.gg/simplets
 - <span class="terminal-command">Email</span>: contact@simplets.tech
+                `;
+            case 'legal':
+                return `
+<strong>Legal Notice</strong>
+
+SIMPLETS is a creative digital project. All content is for informational and entertainment purposes only. No part of this project constitutes financial advice, legal advice, or a solicitation to buy or sell any asset. Use at your own risk. For inquiries, contact the team directly.
                 `;
             default:
                 return `Command not found: ${command}`;
@@ -522,7 +527,7 @@ const CONFIG = {
     availableCommands: [
         'help', 'clear', 'video', 'stop', 
         'about', 'manifesto', 'project', 'minting', 
-        'roadmap', 'team', 'links'
+        'roadmap', 'team', 'links', 'legal'
     ]
 };
 
