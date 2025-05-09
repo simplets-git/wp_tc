@@ -181,6 +181,14 @@ body::-webkit-scrollbar,
     outline: none;
 }
 
+.cli-line-number {
+    color: var(--text-color);
+    font-weight: bold;
+    margin-right: 10px;
+    font-size: 1em;
+    font-family: 'Inconsolata', monospace;
+}
+
 .terminal-animation {
     position: absolute;
     right: 0;
@@ -300,7 +308,6 @@ body::-webkit-scrollbar,
     transition: opacity 0.5s ease, transform 0.2s ease;
     z-index: 10;
     cursor: pointer;
-    user-select: none;
 }
 
 #terminal-logo:hover {

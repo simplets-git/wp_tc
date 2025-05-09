@@ -213,39 +213,23 @@ const TerminalCommands = {
         const lowercaseCommand = command.toLowerCase().trim();
         switch(lowercaseCommand) {
             case 'help':
-                return `Available commands: ${CONFIG.availableCommands.map(cmd => 
+                return `${getTranslation('availableCommands')}${CONFIG.availableCommands.map(cmd => 
                     `<span class="terminal-command">${cmd}</span>`
                 ).join(', ')}`;
             case 'clear':
                 // Keep the welcome message after clearing
                 const terminalOutput = document.getElementById('terminal-output');
-                terminalOutput.innerHTML = '<div class="welcome-line">Welcome to the abyss. Type <span class="terminal-command">help</span> to interact.</div>';
+                terminalOutput.innerHTML = `<div class="welcome-line">${getTranslation('welcome')}</div>`;
                 return '';
             case 'stop':
                 this.stopVideo();
-                return 'Video stopped. Returning to normal CLI view.';
+                return getTranslation('videoStopped');
             case 'video':
                 return this.playVideo(command);
             case 'about':
-                return `
-<strong>SIMPLETS: Redefining Terminal Experience</strong>
-
-SIMPLETS is an innovative terminal interface that blends cutting-edge technology 
-with a minimalist, immersive design. Our mission is to transform how developers 
-and tech enthusiasts interact with their digital environment.
-                `;
+                return getTranslation('commands.about');
             case 'manifesto':
-                return `
-<strong>SIMPLETS Manifesto</strong>
-
-1. <span class="terminal-command">Simplicity</span>: Elegant, intuitive interfaces
-2. <span class="terminal-command">Minimalism</span>: Removing unnecessary complexity
-3. <span class="terminal-command">Innovation</span>: Pushing boundaries of terminal design
-4. <span class="terminal-command">Accessibility</span>: Making tech more approachable
-5. <span class="terminal-command">Creativity</span>: Transforming functional into beautiful
-
-We believe that technology should inspire, not intimidate.
-                `;
+                return getTranslation('commands.manifesto');
             case 'project': {
                 const isLight = document.body.classList.contains('light-theme');
                 const bgColor = isLight ? 'black' : 'white';
@@ -280,80 +264,31 @@ A web3 brand empowering pseudonymous contributors, building a supportive communi
 `;
             }
             case 'minting':
-                return `
-<strong>SIMPLETS Minting</strong>
-
-- <span class="terminal-command">Total Supply</span>: 10,000 unique terminal interfaces
-- <span class="terminal-command">Mint Price</span>: 0.069 ETH
-- <span class="terminal-command">Blockchain</span>: Ethereum
-- <span class="terminal-command">Smart Contract</span>: In development
-- <span class="terminal-command">Whitelist</span>: Coming soon
-
-Minting will grant exclusive access to advanced terminal features.
-                `;
+                return getTranslation('commands.minting');
             case 'roadmap':
-                return `
-<strong>SIMPLETS Roadmap</strong>
-
-<pre>SIMPLETS Roadmap Tree:
-├── NFTs
-│   └── Initial Collection Launch
-├── Community
-│   ├── Guild.xyz Integration
-│   ├── DAO Setup
-│   └── Raves
-├── Infrastructure
-│   ├── Custom Marketplace Development
-│   └── Swarm Network (Eliza OS)
-├── Content
-│   ├── Podcasts
-│   ├── Merch
-│   └── Media Hacks
-├── Ecosystem
-│   └── Strategic Partnerships
-└── Tokenomics
-    ├── Potential Airdrops
-    └── Future Coin Launch</pre>
-
-Potential airdrops, merch, raves, and future coin launch on the way
-                `;
+                return getTranslation('commands.roadmap');
             case 'team':
-                return `
-<strong>SIMPLETS Team</strong>
-
-- <span class="terminal-command">Founder</span>: Anonymous Developer (0xABCD...)
-- <span class="terminal-command">Lead Designer</span>: UI/UX Minimalist
-- <span class="terminal-command">Lead Developer</span>: Full-Stack Innovator
-- <span class="terminal-command">Community Manager</span>: Tech Enthusiast
-
-We are a collective of developers passionate about reimagining digital interfaces.
-                `;
+                return getTranslation('commands.team');
             case 'links':
-                return `
-<strong>SIMPLETS Links</strong>
-
-- <span class="terminal-command">Website</span>: https://simplets.tech
-- <span class="terminal-command">GitHub</span>: https://github.com/simplets-git
-- <span class="terminal-command">Twitter</span>: @SIMPLETS_tech
-- <span class="terminal-command">Discord</span>: discord.gg/simplets
-- <span class="terminal-command">Email</span>: contact@simplets.tech
-                `;
+                return getTranslation('commands.links');
             case 'legal':
-                return `
-<strong>Legal Notice</strong>
-<ul>
-<li><b>SIMPLETS is a VPL (Virtual Public License) project.</b></li>
-<li>The project is primarily community-led; direction and development may evolve based on collective input.</li>
-<li>By using, interacting with, minting, or contributing to SIMPLETS, you do so entirely at your own risk.</li>
-<li>There are no guarantees, warranties, or promises of functionality, value, or outcome.</li>
-<li>"Code is law": all interactions and contributions are governed by the codebase as it exists on-chain and in this repository.</li>
-<li>No individual or entity is liable for any loss, damages, or consequences arising from your participation.</li>
-<li>This is an experimental, creative digital project. Not financial or legal advice.</li>
-</ul>
-For questions or concerns, reach out to the community or project maintainers directly.
-                `;
+                return getTranslation('commands.legal');
+            case 'language':
+                return getTranslation('commands.language');
             default:
-                return `Command not found: ${command}`;
+                // Check for hidden set lang command
+                if (lowercaseCommand.startsWith('set lang ')) {
+                    const langCode = lowercaseCommand.split(' ')[2];
+                    const validLangCodes = ['en', 'hi', 'zh', 'es', 'pt', 'ru', 'id', 'vi', 'ja', 'tr', 'de', 'fr', 'ar', 'th', 'uk'];
+                    
+                    if (validLangCodes.includes(langCode)) {
+                        window.currentLanguage = langCode;
+                        return getTranslation('languageChanged') + langCode;
+                    } else {
+                        return getTranslation('invalidLanguage');
+                    }
+                }
+                return getTranslation('commandNotFound') + command;
         }
     },
     stopVideo() {
@@ -375,7 +310,7 @@ For questions or concerns, reach out to the community or project maintainers dir
     },
     playVideo(command) {
         if (document.body.classList.contains('light-theme')) {
-            return 'WARNING: Please switch to dark theme before playing video. Use theme toggle to switch.';
+            return getTranslation('videoThemeWarning');
         }
         this.stopVideo();
         Utils.hideThemeButton();
@@ -443,6 +378,7 @@ For questions or concerns, reach out to the community or project maintainers dir
 // =====================
 const TerminalInput = {
     addPrompt(terminalOutput) {
+
         const existingActiveLines = document.querySelectorAll('.command-line[contenteditable="true"]');
         existingActiveLines.forEach(line => {
             line.contentEditable = 'false';
@@ -528,6 +464,9 @@ const TerminalInput = {
 // =====================
 // Terminal Configuration
 // =====================
+// Global language setting
+window.currentLanguage = 'en';
+
 const CONFIG = {
     version: 'v0.4',
     username: 'anonymous',
@@ -535,7 +474,7 @@ const CONFIG = {
     availableCommands: [
         'help', 'clear', 'video', 'stop', 
         'about', 'manifesto', 'project', 'minting', 
-        'roadmap', 'team', 'links', 'legal'
+        'roadmap', 'team', 'links', 'legal', 'language'
     ]
 };
 
@@ -599,7 +538,7 @@ document.addEventListener('DOMContentLoaded', () => {
             loadingScreen.style.display = 'none';
             
             const welcomeMessage = Utils.createElement('div');
-            welcomeMessage.innerHTML = 'Welcome to the abyss. Type <span class="terminal-command">help</span> to interact.';
+            welcomeMessage.innerHTML = getTranslation('welcome');
             terminalOutput.appendChild(welcomeMessage);
             
             const terminalLogo = Utils.createElement('div', [], '□_□');
@@ -612,7 +551,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 updateAllThemeSVGs();
 
                 const currentTheme = document.body.classList.contains('light-theme') ? 'Light' : 'Dark';
-                const aboutMessage = `Current Theme: ${currentTheme}`;
+                const aboutMessage = `${getTranslation('currentTheme')}${currentTheme}`;
                 
                 const responseLine = Utils.createElement('div');
                 responseLine.innerHTML = aboutMessage;
