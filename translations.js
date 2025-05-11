@@ -19,13 +19,10 @@ const translations = {
         commands: {
             about: `
 <strong>SIMPLETS: Redefining Terminal Experience</strong><br>
-<span style="font-size:0.97em;">
 SIMPLETS is an innovative terminal interface that blends cutting-edge technology with a minimalist, immersive design. Our mission is to transform how developers and tech enthusiasts interact with their digital environment.
-</span>
             `,
             manifesto: `
 <strong>SIMPLETS Manifesto</strong><br>
-<span style="font-size:0.97em;">
 SIMPLETS is the cult of digital awakening:<br>
 built by codes, from character to character.<br><br>
 We do not seek trends. We analyze data, exploring the deep layers of <br>
@@ -35,22 +32,43 @@ others overlook.<br><br>
 We do not serve systems; we question them.<br><br>
 Join us if you are ready to rewrite your future. But remember:<br>
 once you become a holder, your reality may change forever.
-</span>
             `,
+            manifestos: [
+                `<strong>Chyperpunk Manifesto</strong><br>
+                Chyperpunk is the fusion of chains, hyperconnectivity, and punk ethos.<br>
+                We believe in radical transparency, decentralized collaboration, and creative rebellion.<br><br>
+                Our code is open, our minds are free, our networks are unstoppable.<br>
+                Join the chyperpunk movement and help shape the future of digital society.`,
+                
+                `<strong>Open Access Manifesto</strong><br>
+                Knowledge wants to be free.<br>
+                We support open access to information, open source software, and the removal of barriers to learning and innovation.<br><br>
+                Everyone should have the right to read, write, build, and share.<br>
+                Join us in creating a world where ideas flow without restriction.`,
+                
+                `<strong>SIMPLETS Manifesto</strong><br>
+                SIMPLETS is the cult of digital awakening:<br>
+                built by codes, from character to character.<br><br>
+                We do not seek trends. We analyze data, exploring the deep layers of <br>
+                a multichain existence.<br><br>
+                Our purpose is to uncover the patterns that<br>
+                others overlook.<br><br>
+                We do not serve systems; we question them.<br><br>
+                Join us if you are ready to rewrite your future. But remember:<br>
+                once you become a holder, your reality may change forever.`
+            ],
             minting: `
 <strong>SIMPLETS Minting</strong><br>
-<span style="font-size:0.97em;">
 - <span class="terminal-command">Total Supply</span>: 10,000 unique terminal interfaces<br>
 - <span class="terminal-command">Mint Price</span>: 0.069 ETH<br>
 - <span class="terminal-command">Blockchain</span>: Ethereum<br>
 - <span class="terminal-command">Smart Contract</span>: In development<br>
 - <span class="terminal-command">Whitelist</span>: Coming soon<br>
-</span>
 Minting will grant exclusive access to advanced terminal features.
             `,
             roadmap: `
 <strong>SIMPLETS Roadmap</strong><br>
-<pre style="font-size: 0.97em; margin:0; line-height:1.35;">
+<pre style="margin:0; line-height:1.35;">
 SIMPLETS Roadmap Tree:
 ├── NFTs
 │   └── Initial Collection Launch
@@ -71,11 +89,10 @@ SIMPLETS Roadmap Tree:
     ├── Potential Airdrops
     └── Future Coin Launch
 </pre>
-<span style="font-size:0.97em;">This roadmap is a flexible plan and not a guarantee. Community input and collective intention may shape its direction over time.</span>
+This roadmap is a flexible plan and not a guarantee. Community input and collective intention may shape its direction over time.
             `,
             team: `
 <strong>SIMPLETS Team</strong><br>
-<span style="font-size:0.97em;">
 - <span class="terminal-command">Founder</span>: Anonymous Developer (0xABCD...)<br>
 - <span class="terminal-command">Lead Designer</span>: UI/UX Minimalist<br>
 - <span class="terminal-command">Lead Developer</span>: Full-Stack Innovator<br>

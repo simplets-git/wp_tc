@@ -1,3 +1,4 @@
+console.log('SCRIPT.JS LOADED');
 // =====================
 // Utility Functions
 // =====================
@@ -106,11 +107,11 @@ window._projectSVGPairIndices = null;
 const WaveAnimation = {
     create(terminal) {
         const waveChars = [
-            'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 
-            'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 
+            'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J',
+            'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
             'U', 'V', 'W', 'X', 'Y', 'Z',
-            'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 
-            'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 
+            'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
+            'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
             'u', 'v', 'w', 'x', 'y', 'z',
             '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
             '!', '?', '=', '*', '#', '$'
@@ -130,7 +131,7 @@ const WaveAnimation = {
             svgContainer.appendChild(svg);
 
             const numRows = Math.max(40, Math.ceil(window.innerHeight / 25));
-            const numCols = 12; 
+            const numCols = 12;
             const cellWidth = 25;
             const cellHeight = 25;
 
@@ -158,7 +159,7 @@ const WaveAnimation = {
             }
 
             let lastUpdateTime = 0;
-            const UPDATE_INTERVAL = 100; 
+            const UPDATE_INTERVAL = 100;
 
             const animateWave = (currentTime) => {
                 if (currentTime - lastUpdateTime < UPDATE_INTERVAL) {
@@ -175,9 +176,9 @@ const WaveAnimation = {
                     for (let x = 0; x < numCols; x++) {
                         const index = y * numCols + x;
                         const text = textElements[index];
-                        
+
                         if (Math.random() < 0.0125) {
-                            const char = Math.random() > 0.3 
+                            const char = Math.random() > 0.3
                                 ? waveChars[Math.floor(Math.random() * waveChars.length)]
                                 : ' ';
                             text.textContent = char;
@@ -206,6 +207,234 @@ const WaveAnimation = {
 };
 
 // =====================
+// Cursor Indicator
+// =====================
+const CursorIndicator = {
+    create() {
+        const cursor = document.createElement('span');
+        cursor.classList.add('cursor-indicator');
+        return cursor;
+    },
+
+    attach(element) {
+        // Remove any existing cursors first
+        this.removeAll();
+
+        const cursor = this.create();
+        element.appendChild(cursor);
+
+        // Position the cursor at the end of the text
+        this.updatePosition(element, cursor);
+        return cursor;
+    },
+
+    updatePosition(element, cursor) {
+        if (!element || !cursor) return;
+
+        // Get the command line element
+        const commandLine = element.querySelector('.command-line') || element;
+
+        // Position cursor at the end of the text
+        const textLength = commandLine.textContent.length;
+        const textNode = commandLine.firstChild || commandLine;
+
+        // Set position based on text content
+        cursor.style.left = (textLength * 8) + 'px'; // Approximate character width
+
+        // Position within the command line
+        cursor.style.position = 'absolute';
+        cursor.style.top = '50%';
+        cursor.style.transform = 'translateY(-50%)';
+    },
+
+    remove(cursor) {
+        if (cursor && cursor.parentNode) {
+            cursor.parentNode.removeChild(cursor);
+        }
+    },
+
+    removeAll() {
+        const cursors = document.querySelectorAll('.cursor-indicator');
+        cursors.forEach(cursor => {
+            if (cursor && cursor.parentNode) {
+                cursor.parentNode.removeChild(cursor);
+            }
+        });
+    }
+};
+
+// =====================
+// Terminal Configuration
+// =====================
+// Global language setting
+window.currentLanguage = 'en';
+
+const CONFIG = {
+    version: 'v0.4',
+    username: 'anonymous',
+    hostname: 'simplets',
+    availableCommands: [
+        'help', 'clear', 'video', 'stop',
+        'about', 'manifesto', 'project', 'minting',
+        'roadmap', 'team', 'links', 'legal', 'language'
+    ]
+};
+
+// =====================
+// Terminal Menu System
+// =====================
+const TerminalMenu = {
+    show(options, prompt, onSelect, onCancel) {
+        const terminalOutput = document.getElementById('terminal-output');
+        let selected = 0;
+        let menuId = 'menu-' + Date.now();
+
+        function renderMenu() {
+            // Remove any existing menu with this ID before rendering
+            const existingMenu = document.getElementById(menuId);
+            if (existingMenu) existingMenu.remove();
+
+            // Create the menu container
+            const menuContainer = document.createElement('div');
+            menuContainer.id = menuId;
+            menuContainer.className = 'terminal-menu active';
+
+            // Create menu title
+            const titleElement = document.createElement('div');
+            titleElement.className = 'menu-title';
+            titleElement.innerHTML = `${prompt} (Use ↑/↓, Enter to confirm, Esc to cancel):`;
+            menuContainer.appendChild(titleElement);
+
+            // Create menu list
+            const menuList = document.createElement('ul');
+            menuList.className = 'manifesto-menu';
+
+            // Add menu items
+            options.forEach((opt, i) => {
+                const menuItem = document.createElement('li');
+                menuItem.className = 'menu-item' + (i === selected ? ' selected' : '');
+                menuItem.innerHTML = opt.label;
+                menuList.appendChild(menuItem);
+            });
+
+            menuContainer.appendChild(menuList);
+            terminalOutput.appendChild(menuContainer);
+            Utils.scrollToBottom(terminalOutput);
+        }
+
+        function handleSelection() {
+            // Get selected value
+            const selectedValue = options[selected].value;
+
+            // 1. Remove menu's own event listeners
+            document.removeEventListener('keydown', onKeyDown);
+            // Make sure to remove the inputBlocker with the correct arguments (true for capture phase)
+            document.removeEventListener('keydown', inputBlocker, true);
+
+            // 2. Mark menu as inactive and selected, but keep it on screen
+            const menuElement = document.getElementById(menuId);
+            if (menuElement) {
+                menuElement.className = 'terminal-menu inactive selected'; // Change class instead of removing
+                // Optionally, visually mark the actually selected list item if not already done by renderMenu
+                const listItems = menuElement.querySelectorAll('.menu-item');
+                if (listItems && listItems[selected]) {
+                    listItems.forEach(item => item.classList.remove('final-selection')); // Clear previous final marks
+                    listItems[selected].classList.add('final-selection'); // Mark the one that was chosen
+                }
+            }
+
+            // 3. Call the external onSelect callback
+            // This callback (from TerminalCommands.process for the manifesto command) is responsible for:
+            // - Displaying the manifesto content
+            // - Adding the new prompt line via TerminalInput.addPrompt()
+            if (onSelect) {
+                onSelect(selectedValue, selected);
+            }
+        }
+
+        // Block all keyboard input during menu (except menu navigation)
+        const inputBlocker = e => {
+            if (!(e.ctrlKey || e.metaKey) && e.key !== 'Escape' && 
+                e.key !== 'ArrowUp' && e.key !== 'ArrowDown' && e.key !== 'Enter') {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+        };
+        document.addEventListener('keydown', inputBlocker, true);
+
+        // Menu key handler
+        const onKeyDown = e => {
+            // Allow copy command to work
+            if ((e.metaKey || e.ctrlKey) && e.key === 'c') return;
+
+            // Handle menu navigation
+            switch(e.key) {
+                case 'ArrowUp':
+                    selected = (selected - 1 + options.length) % options.length;
+                    renderMenu();
+                    break;
+                case 'ArrowDown':
+                    selected = (selected + 1) % options.length;
+                    renderMenu();
+                    break;
+                case 'Enter':
+                    handleSelection();
+                    e.preventDefault();
+                    e.stopPropagation();
+                    break;
+                case 'Escape':
+                    if (onCancel) onCancel();
+                    break;
+                default:
+                    return; // Ignore other keys
+            }
+
+            // Always prevent default for menu keys
+            e.preventDefault();
+            e.stopPropagation();
+        };
+
+        console.log('MENU SHOWN');
+        renderMenu();
+
+        // Add a small delay before attaching the keydown listener
+        // This prevents the Enter key from the command from triggering the menu selection
+        setTimeout(() => {
+            document.addEventListener('keydown', onKeyDown);
+            console.log('MENU LISTENER ATTACHED');
+        }, 100);
+
+        // Cleanup function
+        const deactivateMenu = () => {
+            document.removeEventListener('keydown', inputBlocker, true);
+            document.removeEventListener('keydown', onKeyDown);
+            const menu = document.getElementById(menuId);
+            if (menu) {
+                menu.classList.remove('active');
+                menu.classList.add('inactive');
+            }
+        };
+
+        // Call cleanup when menu is closed
+        if (onCancel) {
+            const originalOnCancel = onCancel;
+            onCancel = () => { 
+                deactivateMenu(); 
+                originalOnCancel(); 
+            };
+        }
+        
+        if (onSelect) {
+            const originalOnSelect = onSelect;
+            onSelect = (value, index) => { 
+                deactivateMenu(); 
+                originalOnSelect(value, index); 
+            };
+        }
+    }
+};
+
+// =====================
 // Terminal Command Handler
 // =====================
 const TerminalCommands = {
@@ -216,11 +445,24 @@ const TerminalCommands = {
                 return `${getTranslation('availableCommands')}${CONFIG.availableCommands.map(cmd => 
                     `<span class="terminal-command">${cmd}</span>`
                 ).join(', ')}`;
-            case 'clear':
-                // Keep the welcome message after clearing
+            case 'clear': {
                 const terminalOutput = document.getElementById('terminal-output');
-                terminalOutput.innerHTML = `<div class="welcome-line">${getTranslation('welcome')}</div>`;
-                return '';
+                const welcomeLine = terminalOutput.querySelector('.welcome-line');
+
+                // Clear all content except the welcome line
+                terminalOutput.innerHTML = '';
+                if (welcomeLine) {
+                    terminalOutput.appendChild(welcomeLine);
+                } else {
+                    // If no welcome line exists, create one
+                    const newWelcome = Utils.createElement('div', ['welcome-line']);
+                    newWelcome.innerHTML = getTranslation('welcome');
+                    terminalOutput.appendChild(newWelcome);
+                }
+
+                // Return false to prevent adding a new prompt immediately
+                return { menuActive: false, suppressPrompt: true };
+            }
             case 'stop':
                 this.stopVideo();
                 return getTranslation('videoStopped');
@@ -228,8 +470,71 @@ const TerminalCommands = {
                 return this.playVideo(command);
             case 'about':
                 return getTranslation('commands.about');
-            case 'manifesto':
-                return getTranslation('commands.manifesto');
+            case 'manifesto': {
+                const manifestos = translations[window.currentLanguage || 'en'].commands.manifestos;
+
+                // Disable all command inputs before showing menu
+                document.querySelectorAll('.command-line').forEach(line => {
+                    line.contentEditable = 'false';
+                    line.classList.add('disabled');
+                });
+                document.querySelectorAll('.cursor-indicator').forEach(cursor => cursor.remove());
+
+                TerminalMenu.show(
+                    [
+                        { label: 'Chyperpunk Manifesto', value: manifestos[0] },
+                        { label: 'Open Access Manifesto', value: manifestos[1] },
+                        { label: 'SIMPLETS Manifesto', value: manifestos[2] }
+                    ],
+                    'Select a Manifesto:',
+                    (selectedValue) => {
+                        console.log('🔍 DIAGNOSTIC: Manifesto onSelect triggered.');
+                        const terminalOutput = document.getElementById('terminal-output');
+                        console.log('🔍 DIAGNOSTIC: terminalOutput:', terminalOutput ? 'found' : 'NOT FOUND');
+                        
+                        const existingResponse = terminalOutput.querySelector('.manifesto-content');
+                        if (existingResponse) existingResponse.remove();
+
+                        const responseLine = Utils.createElement('div', ['manifesto-content']);
+                        responseLine.innerHTML = selectedValue.replace(/\n/g, '<br>');
+                        terminalOutput.appendChild(responseLine);
+                        console.log('🔍 DIAGNOSTIC: Manifesto content displayed.');
+
+                        console.log('🔍 DIAGNOSTIC: Calling TerminalInput.addPrompt...');
+                        TerminalInput.addPrompt(terminalOutput);
+                        console.log('🔍 DIAGNOSTIC: TerminalInput.addPrompt called.');
+
+                        const newCommandLine = terminalOutput.querySelector('.command-line[contenteditable="true"]');
+                        console.log('🔍 DIAGNOSTIC: newCommandLine found after addPrompt:', newCommandLine ? 'found' : 'NOT FOUND', newCommandLine);
+                        
+                        if (newCommandLine) {
+                            console.log('🔍 DIAGNOSTIC: Focusing newCommandLine...');
+                            newCommandLine.focus();
+                            console.log('🔍 DIAGNOSTIC: newCommandLine focused. Active element:', document.activeElement);
+                            
+                            // Explicitly set selection/cursor position
+                            const selection = window.getSelection();
+                            selection.removeAllRanges(); // Clear existing ranges first
+                            const range = document.createRange();
+                            range.selectNodeContents(newCommandLine); // Select all content (empty for new line)
+                            range.collapse(true); // Collapse to the start of the node
+                            selection.addRange(range); // Apply the new range
+                            console.log('🔍 DIAGNOSTIC: Selection set in newCommandLine. Range count:', selection.rangeCount);
+
+                        } else {
+                            console.error('🔴 ERROR: newCommandLine not found after TerminalInput.addPrompt!');
+                        }
+                    },
+                    () => { // onCancel
+                        console.log('🔍 DIAGNOSTIC: Manifesto menu onCancel triggered!');
+                        TerminalInput.addPrompt(terminalOutput);
+                        const newCommandLine = terminalOutput.querySelector('.command-line[contenteditable="true"]');
+                        if (newCommandLine) newCommandLine.focus();
+                    }
+                );
+
+                return { menuActive: true };
+            }
             case 'project': {
                 const isLight = document.body.classList.contains('light-theme');
                 const bgColor = isLight ? 'black' : 'white';
@@ -280,7 +585,7 @@ A web3 brand empowering pseudonymous contributors, building a supportive communi
                 if (lowercaseCommand.startsWith('set lang ')) {
                     const langCode = lowercaseCommand.split(' ')[2];
                     const validLangCodes = ['en', 'hi', 'zh', 'es', 'pt', 'ru', 'id', 'vi', 'ja', 'tr', 'de', 'fr', 'ar', 'th', 'uk'];
-                    
+
                     if (validLangCodes.includes(langCode)) {
                         window.currentLanguage = langCode;
                         return getTranslation('languageChanged') + langCode;
@@ -378,39 +683,88 @@ A web3 brand empowering pseudonymous contributors, building a supportive communi
 // =====================
 const TerminalInput = {
     addPrompt(terminalOutput) {
+        const existingCursor = document.querySelector('.cursor-indicator');
+        if (existingCursor) existingCursor.remove();
 
-        const existingActiveLines = document.querySelectorAll('.command-line[contenteditable="true"]');
-        existingActiveLines.forEach(line => {
-            line.contentEditable = 'false';
-        });
+        const existingActiveLines = document.querySelectorAll('.command-line');
+        existingActiveLines.forEach(line => line.contentEditable = 'false');
 
         const promptLine = Utils.createElement('div', ['prompt-line']);
         promptLine.innerHTML = `
             <span class="user-info">[${CONFIG.username}]</span>:
             <span class="path">~</span>$ 
-            <span class="command-line" contenteditable="true"></span>
+            <span class="command-line-container">
+                <span class="command-line" contenteditable="true"></span>
+            </span>
         `;
 
-        promptLine.classList.add('visible');
-
         terminalOutput.appendChild(promptLine);
-        
+
+        const commandLineContainer = promptLine.querySelector('.command-line-container');
         const commandLine = promptLine.querySelector('.command-line');
+
+        // Add cursor to container
+        const cursor = document.createElement('span');
+        cursor.classList.add('cursor-indicator');
+        commandLineContainer.appendChild(cursor);
+
+        // Function to update cursor position
+        const updateCursorPosition = () => {
+            // Create temporary span to measure text width
+            const tempSpan = document.createElement('span');
+            tempSpan.style.position = 'absolute';
+            tempSpan.style.visibility = 'hidden';
+            tempSpan.style.whiteSpace = 'pre';
+            tempSpan.style.font = window.getComputedStyle(commandLine).font;
+            tempSpan.textContent = commandLine.textContent;
+            document.body.appendChild(tempSpan);
+
+            // Position cursor at end of text
+            cursor.style.left = `${tempSpan.offsetWidth}px`;
+            document.body.removeChild(tempSpan);
+        };
+
+        // Update cursor position on input and focus
+        commandLine.addEventListener('input', updateCursorPosition);
+        commandLine.addEventListener('keydown', updateCursorPosition);
+        commandLine.addEventListener('click', updateCursorPosition);
+
+        // Initialize cursor position
+        updateCursorPosition();
+        commandLine.focus();
+        Utils.scrollToBottom(terminalOutput);
 
         const handleCommand = () => {
             const command = commandLine.textContent.trim();
-            
+
+            // Store cursor state before processing command
+            const currentCursor = document.querySelector('.cursor-indicator');
+
             commandLine.contentEditable = 'false';
 
             if (command) {
-                const responseLine = Utils.createElement('div');
                 const response = TerminalCommands.process(command);
-                if (response) {
+
+                if (response?.menuActive) {
+                    if (currentCursor) currentCursor.remove();
+                    return;
+                }
+
+                if (typeof response === 'string') {
+                    const responseLine = Utils.createElement('div');
                     responseLine.innerHTML = response.replace(/\n/g, '<br>');
                     terminalOutput.appendChild(responseLine);
                 }
 
-                this.addPrompt(terminalOutput);
+                // Skip prompt if command requests it
+                if (response?.suppressPrompt) return;
+            }
+
+            // Always add new prompt unless in menu mode or suppressed
+            if (!command || !TerminalCommands.process(command).menuActive) {
+                setTimeout(() => {
+                    this.addPrompt(terminalOutput);
+                }, 10);
             }
 
             Utils.scrollToBottom(terminalOutput);
@@ -422,33 +776,106 @@ const TerminalInput = {
                 handleCommand();
             }
         });
-
-        Utils.scrollToBottom(terminalOutput);
     },
     initGlobalKeyHandling() {
         document.addEventListener('keydown', (e) => {
+            console.log('🔍 DIAGNOSTIC: Global keydown event:', e.key);
+            
+            // Allow Cmd+C (or Ctrl+C) for copying text
+            if ((e.metaKey || e.ctrlKey) && e.key === 'c') {
+                // Don't prevent default or stop propagation - let the browser handle the copy
+                return;
+            }
+
             const loadingScreen = document.getElementById('loading-screen');
             if (loadingScreen.style.display !== 'none') return;
 
+            // If activeElement is an editable command line and it's a normal character, let browser handle it (if menu not active).
+            const activeElement = document.activeElement;
+            const key = e.key;
+            const isChar = key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey;
+
+            if (activeElement && activeElement.classList && activeElement.classList.contains('command-line') && 
+                activeElement.getAttribute('contenteditable') === 'true' && isChar) {
+                
+                const menuElement = document.querySelector('.terminal-menu'); 
+                if (!menuElement || menuElement.style.display === 'none') {
+                    console.log('🔍 DIAGNOSTIC: Active command line is focused. Letting browser handle character:', key);
+                    return; 
+                }
+            }
+            
+            // DIAGNOSTIC: Log active element before any focus changes
+            console.log('🔍 DIAGNOSTIC: Active element before focus change:', document.activeElement);
+            console.log('🔍 DIAGNOSTIC: Active element is command line?', document.activeElement.classList?.contains('command-line'));
+            
+            // CRITICAL FIX: Check if we're in a post-manifesto state
+            // If there's a manifesto content element and an editable command line after it,
+            // we should not redirect input to the last command line
+            const manifestoContent = document.querySelector('.manifesto-content');
+            console.log('🔍 DIAGNOSTIC: Manifesto content found?', !!manifestoContent);
+            
+            if (manifestoContent) {
+                // Find all command lines that come after the manifesto content
+                const allNodes = Array.from(document.getElementById('terminal-output').childNodes);
+                const manifestoIndex = allNodes.indexOf(manifestoContent);
+                console.log('🔍 DIAGNOSTIC: Manifesto index in nodes:', manifestoIndex);
+                
+                if (manifestoIndex !== -1) {
+                    // Look for an editable command line after the manifesto
+                    let foundEditableLine = false;
+                    for (let i = manifestoIndex + 1; i < allNodes.length; i++) {
+                        const node = allNodes[i];
+                        console.log('🔍 DIAGNOSTIC: Checking node after manifesto:', node);
+                        
+                        const editableLine = node.querySelector?.('.command-line[contenteditable="true"]');
+                        if (editableLine) {
+                            console.log('🔍 DIAGNOSTIC: Found editable line after manifesto!', editableLine);
+                            foundEditableLine = true;
+                            
+                            // We found an editable line after the manifesto, so we should use that
+                            // and not redirect input elsewhere
+                            if (!editableLine.matches(':focus') && e.key.length === 1) {
+                                console.log('🔍 DIAGNOSTIC: Focusing editable line after manifesto');
+                                e.preventDefault();
+                                editableLine.focus();
+                                return;
+                            }
+                            return; // Already focused or not a character key
+                        }
+                    }
+                    console.log('🔍 DIAGNOSTIC: Found editable line after manifesto?', foundEditableLine);
+                }
+            }
+            
+            // Original behavior for non-manifesto cases
             const commandLines = document.querySelectorAll('.command-line');
+            console.log('🔍 DIAGNOSTIC: Total command lines found:', commandLines.length);
+            
             const lastCommandLine = commandLines[commandLines.length - 1];
+            console.log('🔍 DIAGNOSTIC: Last command line:', lastCommandLine);
+            console.log('🔍 DIAGNOSTIC: Last command line editable?', lastCommandLine?.contentEditable === 'true');
 
             if (lastCommandLine && lastCommandLine.contentEditable !== 'true') {
+                console.log('🔍 DIAGNOSTIC: Making last command line editable');
                 lastCommandLine.contentEditable = 'true';
             }
 
             if (!lastCommandLine) {
+                console.log('🔍 DIAGNOSTIC: No command line found, adding prompt');
                 this.addPrompt(document.getElementById('terminal-output'));
                 return;
             }
 
             if (e.key.length === 1 && !lastCommandLine.matches(':focus')) {
+                console.log('🔍 DIAGNOSTIC: Redirecting input to last command line');
                 e.preventDefault();
                 lastCommandLine.focus();
-                
+
                 if (!e.ctrlKey && !e.altKey && !e.metaKey) {
+                    console.log('🔍 DIAGNOSTIC: Adding key to last command line:', e.key);
                     lastCommandLine.textContent += e.key;
-                    
+
                     const range = document.createRange();
                     const selection = window.getSelection();
                     range.selectNodeContents(lastCommandLine);
@@ -458,25 +885,30 @@ const TerminalInput = {
                 }
             }
         });
+    },
+    handleInput(e) {
+        const cursor = e.target.querySelector('.cursor-indicator');
+        if (cursor) {
+            const range = document.createRange();
+            const sel = window.getSelection();
+            range.setStart(e.target, e.target.childNodes.length);
+            range.collapse(true);
+            sel.removeAllRanges();
+            sel.addRange(range);
+        }
+    },
+    handleKeyDown(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const command = e.target.textContent.trim();
+            TerminalCommands.process(command);
+            e.target.contentEditable = 'false';
+            TerminalInput.addPrompt(document.getElementById('terminal-output'));
+        }
     }
 };
 
-// =====================
-// Terminal Configuration
-// =====================
-// Global language setting
-window.currentLanguage = 'en';
-
-const CONFIG = {
-    version: 'v0.4',
-    username: 'anonymous',
-    hostname: 'simplets',
-    availableCommands: [
-        'help', 'clear', 'video', 'stop', 
-        'about', 'manifesto', 'project', 'minting', 
-        'roadmap', 'team', 'links', 'legal', 'language'
-    ]
-};
+// ... (rest of the code remains the same)
 
 // =====================
 // Main Initialization
@@ -494,13 +926,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const asciiArtElement = document.getElementById('ascii-art');
     const terminalOutput = document.getElementById('terminal-output');
     const terminal = document.getElementById('terminal');
+    const terminalInput = document.getElementById('terminal-input');
+    const terminalInputArea = document.getElementById('terminal-input-area');
 
     asciiArtElement.textContent = asciiArt;
 
     const animateLoadingScreen = () => {
         setTimeout(() => {
             const logo = document.getElementById('logo');
-            logo.style.opacity = '1';
+            if (logo) logo.style.opacity = '1';
         }, 300);
 
         setTimeout(() => {
@@ -536,14 +970,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         setTimeout(() => {
             loadingScreen.style.display = 'none';
-            
-            const welcomeMessage = Utils.createElement('div');
+
+            const welcomeMessage = Utils.createElement('div', ['welcome-line']);
             welcomeMessage.innerHTML = getTranslation('welcome');
             terminalOutput.appendChild(welcomeMessage);
-            
+
             const terminalLogo = Utils.createElement('div', [], '□_□');
             terminalLogo.id = 'terminal-logo';
-            
+
             terminalLogo.addEventListener('click', () => {
                 document.body.classList.toggle('dark-theme');
                 document.body.classList.toggle('light-theme');
@@ -552,31 +986,43 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const currentTheme = document.body.classList.contains('light-theme') ? 'Light' : 'Dark';
                 const aboutMessage = `${getTranslation('currentTheme')}${currentTheme}`;
-                
+
                 const responseLine = Utils.createElement('div');
                 responseLine.innerHTML = aboutMessage;
                 terminalOutput.appendChild(responseLine);
-                
+
                 TerminalInput.addPrompt(terminalOutput);
-                
+
                 Utils.scrollToBottom(terminalOutput);
             });
-            
+
             terminal.appendChild(terminalLogo);
-            
+
             setTimeout(() => {
-                terminalLogo.style.opacity = '1';
+                if (terminalLogo) terminalLogo.style.opacity = '1';
             }, 1500);
-            
+
             WaveAnimation.create(terminal);
-            
+
             TerminalInput.addPrompt(terminalOutput);
             TerminalInput.initGlobalKeyHandling();
+
+            // We'll add the cursor indicator to the command line instead of the input area
+            setTimeout(() => {
+                const commandLine = document.querySelector('.command-line[contenteditable="true"]');
+                if (commandLine) {
+                    // Only add cursor if it doesn't exist yet
+                    if (!document.querySelector('.cursor-indicator')) {
+                        const cursorElement = CursorIndicator.create();
+                        commandLine.parentNode.appendChild(cursorElement);
+                    }
+                }
+            }, 100);
 
             const terminalOutputElement = document.getElementById('terminal-output');
             terminalOutputElement.style.opacity = '0';
             terminalOutputElement.style.transform = 'translateY(20px)';
-            
+
             setTimeout(() => {
                 terminalOutputElement.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
                 terminalOutputElement.style.opacity = '1';

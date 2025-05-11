@@ -9,6 +9,7 @@
     --command-bg-color: white;
     --command-text-color: black;
     --path-color: #1E88E5;
+    --accent-color: #03A9F4; /* Added accent color variable */
 }
 
 .light-theme {
@@ -137,6 +138,8 @@ body::-webkit-scrollbar,
     opacity: 1;
     transform: scaleX(1);
     transition: none;
+    margin-bottom: 5px;
+    min-height: 20px;
 }
 
 .user-info {
@@ -151,11 +154,41 @@ body::-webkit-scrollbar,
     font-size: 16px;
 }
 
+.command-line-container {
+    position: relative;
+    display: inline-block;
+    min-height: 20px;
+    line-height: 1.2;
+}
+
 .command-line {
-    flex-grow: 1;
-    outline: none;
-    caret-color: white;
-    font-size: 18px;
+    display: inline-block;
+    caret-color: transparent;
+    min-width: 1px;
+    font-size: 16px;
+    position: relative;
+    z-index: 1;
+    line-height: 1.2;
+    padding: 0;
+    margin: 0;
+}
+
+.command-line.disabled {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.cursor-indicator {
+    position: absolute;
+    width: 8px;
+    height: 16px;
+    background-color: var(--text-color);
+    animation: blink-cursor 0.8s infinite;
+    top: 0;
+    bottom: 0;
+    margin: auto 0;
+    margin-left: 2px;
+    pointer-events: none;
 }
 
 .command-line::after {
@@ -165,6 +198,11 @@ body::-webkit-scrollbar,
 @keyframes blink-caret {
     from, to { opacity: 0; }
     50% { opacity: 1; }
+}
+
+@keyframes blink-cursor {
+    from, to { opacity: 1; }
+    50% { opacity: 0; }
 }
 
 @keyframes typewriter {
@@ -278,6 +316,12 @@ body::-webkit-scrollbar,
     color: var(--text-color);
     font-size: 18px;
     line-height: 1.4;
+}
+
+.manifesto-content {
+    margin: 10px 0;
+    padding: 10px;
+    border-left: 2px solid var(--accent-color);
 }
 
 /* Logo Styling */
