@@ -1,6 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Monaspace+Neon&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&display=swap');
 
+/* Wave Animation Styles - Now handled directly in JavaScript */
+
+
 /* Theme Variables */
 :root {
     --bg-color: black;
@@ -399,7 +402,7 @@ body::-webkit-scrollbar,
 }
 
 .terminal-menu .menu-title {
-    font-weight: bold;
+    font-weight: normal;
     padding: 10px;
     background-color: transparent; /* Explicitly no background */
     color: var(--text-color); /* Use general text color for visibility */
@@ -416,9 +419,9 @@ body::-webkit-scrollbar,
 }
 
 .manifesto-content {
-    margin: 10px 0;
-    padding: 10px;
-    border-left: 2px solid var(--accent-color);
+    margin: 0;
+    padding: 0;
+    border-left: none;
 }
 
 /* Logo Styling */

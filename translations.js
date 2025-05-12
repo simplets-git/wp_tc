@@ -66,10 +66,8 @@ once you become a holder, your reality may change forever.
 - <span class="terminal-command">Whitelist</span>: Coming soon<br>
 Minting will grant exclusive access to advanced terminal features.
             `,
-            roadmap: `
-<strong>SIMPLETS Roadmap</strong><br>
-<pre style="margin:0; line-height:1.35;">
-SIMPLETS Roadmap Tree:
+            roadmap: `<pre style="margin:0; line-height:1.35;">
+Roadmap Tree:
 ├── NFTs
 │   └── Initial Collection Launch
 ├── Community

@@ -163,11 +163,11 @@ window._projectSVGPairIndices = null;
 const WaveAnimation = {
     create(terminal) {
         const waveChars = [
-            'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J',
-            'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
+            'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 
+            'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 
             'U', 'V', 'W', 'X', 'Y', 'Z',
-            'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
-            'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
+            'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 
+            'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 
             'u', 'v', 'w', 'x', 'y', 'z',
             '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
             '!', '?', '=', '*', '#', '$'
@@ -187,7 +187,7 @@ const WaveAnimation = {
             svgContainer.appendChild(svg);
 
             const numRows = Math.max(40, Math.ceil(window.innerHeight / 25));
-            const numCols = 12;
+            const numCols = 12; 
             const cellWidth = 25;
             const cellHeight = 25;
 
@@ -201,6 +201,9 @@ const WaveAnimation = {
             }
 
             const textElements = [];
+            const charStates = []; // Track state of each character
+            
+            // Initialize characters with random initial states
             for (let y = 0; y < numRows; y++) {
                 for (let x = 0; x < numCols; x++) {
                     const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
@@ -209,13 +212,27 @@ const WaveAnimation = {
                     text.setAttribute('font-family', 'Share Tech Mono');
                     text.setAttribute('font-size', '18');
                     text.setAttribute('fill', 'white');
+                    
+                    // Initialize with random character or space
+                    const isSpace = Math.random() > 0.6; // 40% chance of character initially
+                    const char = isSpace ? ' ' : waveChars[Math.floor(Math.random() * waveChars.length)];
+                    text.textContent = char;
+                    
+                    // Set initial opacity based on gradient
+                    text.setAttribute('opacity', isSpace ? '0' : gradientIntensities[x]);
+                    
                     svg.appendChild(text);
                     textElements.push(text);
+                    charStates.push({
+                        lastChange: 0,
+                        isSpace: isSpace,
+                        opacity: isSpace ? 0 : 1
+                    });
                 }
             }
 
             let lastUpdateTime = 0;
-            const UPDATE_INTERVAL = 100;
+            const UPDATE_INTERVAL = 200; // Slower updates (from 100ms to 200ms)
 
             const animateWave = (currentTime) => {
                 if (currentTime - lastUpdateTime < UPDATE_INTERVAL) {
@@ -232,15 +249,66 @@ const WaveAnimation = {
                     for (let x = 0; x < numCols; x++) {
                         const index = y * numCols + x;
                         const text = textElements[index];
-
-                        if (Math.random() < 0.0125) {
-                            const char = Math.random() > 0.3
-                                ? waveChars[Math.floor(Math.random() * waveChars.length)]
-                                : ' ';
-                            text.textContent = char;
+                        
+                        const now = Date.now();
+                        const state = charStates[index];
+                        
+                        // Update opacity for smooth transitions
+                        if (state.targetOpacity !== undefined) {
+                            // Calculate time elapsed since last update
+                            const elapsed = now - state.lastUpdate;
+                            // Use a consistent 3000ms transition time
+                            const transitionDuration = 3000;
+                            // Calculate progress (0 to 1)
+                            const progress = Math.min(1, elapsed / transitionDuration);
+                            
+                            // Use ease-in-out function for smoother transition
+                            // This creates a more natural, less linear fade
+                            const easeInOut = progress => {
+                                return progress < 0.5
+                                    ? 2 * progress * progress
+                                    : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+                            };
+                            
+                            // Apply easing to progress
+                            const easedProgress = easeInOut(progress);
+                            
+                            // Interpolate between current and target opacity
+                            const startOpacity = state.startOpacity || 0;
+                            const targetOpacity = state.targetOpacity;
+                            state.opacity = startOpacity + (targetOpacity - startOpacity) * easedProgress;
+                            
+                            // If transition complete, finalize opacity
+                            if (progress >= 1) {
+                                state.opacity = targetOpacity;
+                                delete state.targetOpacity;
+                                delete state.startOpacity;
+                            }
                         }
-
-                        text.setAttribute('opacity', `${gradientIntensities[x]}`);
+                        
+                        // Only consider changing if it's been at least 3 seconds since last change
+                        if (now - state.lastChange > 3000 && Math.random() < 0.003) {
+                            state.isSpace = Math.random() > 0.6; // 40% chance of character
+                            const char = state.isSpace ? ' ' : waveChars[Math.floor(Math.random() * waveChars.length)];
+                            
+                            // Start fade out
+                            state.startOpacity = state.opacity || 0;
+                            state.targetOpacity = 0;
+                            state.lastUpdate = now;
+                            
+                            // After fade out, change character and fade back in
+                            setTimeout(() => {
+                                text.textContent = char;
+                                state.startOpacity = 0;
+                                state.targetOpacity = 1;
+                                state.lastUpdate = Date.now();
+                                state.lastChange = now;
+                            }, 1500); // Half of the 3s transition time
+                        }
+                        
+                        // Apply gradient and current opacity
+                        const finalOpacity = gradientIntensities[x] * (state.isSpace ? 0 : (state.opacity || 0));
+                        text.setAttribute('opacity', finalOpacity);
                     }
                 }
 
@@ -321,12 +389,11 @@ const CursorIndicator = {
 
 // =====================
 // Terminal Configuration
-// =====================
 // Global language setting
 window.currentLanguage = 'en';
 
 const CONFIG = {
-    version: 'v0.4',
+    version: 'v.0.60.6',
     username: 'anonymous',
     hostname: 'simplets',
     availableCommands: [
@@ -358,7 +425,7 @@ const TerminalMenu = {
             // Create menu title
             const titleElement = document.createElement('div');
             titleElement.className = 'menu-title';
-            titleElement.innerHTML = `${prompt} (Use ↑/↓, Enter to confirm, Esc to cancel):`;
+            titleElement.innerHTML = `<em>${prompt} (Use ↑/↓, Enter to confirm, Esc to cancel):</em>`;
             menuContainer.appendChild(titleElement);
 
             // Create menu list
@@ -1051,6 +1118,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Helper function for terminal logo click
 function handleTerminalLogoClick() {
+    const terminalOutput = document.getElementById('terminal-output');
+    // Save current scroll position
+    const scrollTop = terminalOutput.scrollTop;
+
     document.body.classList.toggle('dark-theme');
     document.body.classList.toggle('light-theme');
 
@@ -1064,7 +1135,8 @@ function handleTerminalLogoClick() {
     terminalOutput.appendChild(responseLine);
 
     TerminalInput.addPrompt(terminalOutput);
-    Utils.scrollToBottom(terminalOutput);
+    // Restore previous scroll position
+    terminalOutput.scrollTop = scrollTop;
 }
 
 // Helper function to set up the terminal interface after loading
