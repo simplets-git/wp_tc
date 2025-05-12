@@ -3,6 +3,39 @@ console.log('SCRIPT.JS LOADED');
 // Utility Functions
 // =====================
 const Utils = {
+    focusAndSetCursorAtEnd(element) {
+        if (!element) return;
+        // Remove all child nodes except text (should only be text)
+        if (element.childNodes.length > 1 || (element.childNodes.length === 1 && element.childNodes[0].nodeType !== Node.TEXT_NODE)) {
+            element.textContent = element.textContent;
+        }
+        element.focus();
+        // Use the bulletproof method for caret at end
+        const selection = window.getSelection();
+        if (selection) {
+            const range = document.createRange();
+            range.selectNodeContents(element);
+            range.collapse(false); // Collapse to end
+            selection.removeAllRanges();
+            selection.addRange(range);
+        }
+    },
+    // Utility to update the visual cursor position to the end of the text
+    updateVisualCursor(commandLine) {
+        const cursor = commandLine?.parentNode?.querySelector('.cursor-indicator');
+        if (!cursor || !commandLine) return;
+        // Create a hidden span to measure text width
+        const tempSpan = document.createElement('span');
+        tempSpan.style.position = 'absolute';
+        tempSpan.style.visibility = 'hidden';
+        tempSpan.style.whiteSpace = 'pre';
+        tempSpan.style.font = window.getComputedStyle(commandLine).font;
+        tempSpan.textContent = commandLine.textContent;
+        document.body.appendChild(tempSpan);
+        // Position cursor at end of text
+        cursor.style.left = `${tempSpan.offsetWidth}px`;
+        document.body.removeChild(tempSpan);
+    },
     createElement(tag, classes = [], text = '') {
         const element = document.createElement(tag);
         if (classes.length) element.classList.add(...classes);
@@ -12,6 +45,29 @@ const Utils = {
     scrollToBottom(element) {
         element.scrollTop = element.scrollHeight;
     },
+
+    focusAndSetCursorAtStart(element) {
+        if (!element) {
+            console.error(' ERROR: focusAndSetCursorAtStart called with null element');
+            return;
+        }
+        console.log(' DIAGNOSTIC: Utils.focusAndSetCursorAtStart for element:', element);
+        element.focus();
+        console.log(' DIAGNOSTIC: Element focused. Active element:', document.activeElement);
+        
+        const selection = window.getSelection();
+        if (selection) {
+            selection.removeAllRanges(); 
+            const range = document.createRange();
+            range.selectNodeContents(element); 
+            range.collapse(true); // Collapse to the start of the node
+            selection.addRange(range);
+            console.log(' DIAGNOSTIC: Selection set in element. Range count:', selection.rangeCount);
+        } else {
+            console.warn(' WARNING: window.getSelection() returned null in focusAndSetCursorAtStart.');
+        }
+    },
+
     fadeIn(element, duration = 500) {
         element.style.opacity = '0';
         element.style.display = 'block';
@@ -433,129 +489,96 @@ const TerminalMenu = {
         }
     }
 };
-
-// =====================
 // Terminal Command Handler
 // =====================
 const TerminalCommands = {
-    process(command) {
-        const lowercaseCommand = command.toLowerCase().trim();
-        switch(lowercaseCommand) {
-            case 'help':
-                return `${getTranslation('availableCommands')}${CONFIG.availableCommands.map(cmd => 
-                    `<span class="terminal-command">${cmd}</span>`
-                ).join(', ')}`;
-            case 'clear': {
+    // Existing Handler Methods
+    handleHelpCommand() {
+        return `${getTranslation('availableCommands')}${CONFIG.availableCommands.map(cmd => 
+            `<span class="terminal-command">${cmd}</span>`
+        ).join(', ')}`;
+    },
+    handleAboutCommand() {
+        return getTranslation('commands.about');
+    },
+    handleStopCommand() {
+        this.stopVideo(); 
+        return getTranslation('videoStopped');
+    },
+    handleClearCommand() {
+        const terminalOutput = document.getElementById('terminal-output');
+        const welcomeLine = terminalOutput.querySelector('.welcome-line');
+        terminalOutput.innerHTML = '';
+        if (welcomeLine) {
+            terminalOutput.appendChild(welcomeLine);
+        } else {
+            const newWelcome = Utils.createElement('div', ['welcome-line']);
+            newWelcome.innerHTML = getTranslation('welcome');
+            terminalOutput.appendChild(newWelcome);
+        }
+        return { menuActive: false, suppressPrompt: true };
+    },
+    handleVideoCommand(command) {
+        return this.playVideo(command);
+    },
+    handleManifestoCommand() {
+        const manifestos = translations[window.currentLanguage || 'en'].commands.manifestos;
+        document.querySelectorAll('.command-line').forEach(line => {
+            line.contentEditable = 'false';
+            line.classList.add('disabled');
+        });
+        document.querySelectorAll('.cursor-indicator').forEach(cursor => cursor.remove());
+        TerminalMenu.show(
+            [
+                { label: 'Chyperpunk Manifesto', value: manifestos[0] },
+                { label: 'Open Access Manifesto', value: manifestos[1] },
+                { label: 'SIMPLETS Manifesto', value: manifestos[2] }
+            ],
+            'Select a Manifesto:',
+            (selectedValue) => {
                 const terminalOutput = document.getElementById('terminal-output');
-                const welcomeLine = terminalOutput.querySelector('.welcome-line');
-
-                // Clear all content except the welcome line
-                terminalOutput.innerHTML = '';
-                if (welcomeLine) {
-                    terminalOutput.appendChild(welcomeLine);
+                const existingResponse = terminalOutput.querySelector('.manifesto-content');
+                if (existingResponse) existingResponse.remove();
+                const responseLine = Utils.createElement('div', ['manifesto-content']);
+                responseLine.innerHTML = selectedValue.replace(/\n/g, '<br>');
+                terminalOutput.appendChild(responseLine);
+                TerminalInput.addPrompt(terminalOutput);
+                const newCommandLine = terminalOutput.querySelector('.command-line[contenteditable="true"]');
+                if (newCommandLine) {
+                    Utils.focusAndSetCursorAtStart(newCommandLine);
                 } else {
-                    // If no welcome line exists, create one
-                    const newWelcome = Utils.createElement('div', ['welcome-line']);
-                    newWelcome.innerHTML = getTranslation('welcome');
-                    terminalOutput.appendChild(newWelcome);
+                    console.error(' ERROR: newCommandLine not found after TerminalInput.addPrompt!');
                 }
-
-                // Return false to prevent adding a new prompt immediately
-                return { menuActive: false, suppressPrompt: true };
+            },
+            () => { 
+                const terminalOutput = document.getElementById('terminal-output');
+                console.log(' DIAGNOSTIC: Manifesto menu onCancel triggered!');
+                TerminalInput.addPrompt(terminalOutput);
+                const newCommandLine = terminalOutput.querySelector('.command-line[contenteditable="true"]');
+                if (newCommandLine) newCommandLine.focus();
             }
-            case 'stop':
-                this.stopVideo();
-                return getTranslation('videoStopped');
-            case 'video':
-                return this.playVideo(command);
-            case 'about':
-                return getTranslation('commands.about');
-            case 'manifesto': {
-                const manifestos = translations[window.currentLanguage || 'en'].commands.manifestos;
-
-                // Disable all command inputs before showing menu
-                document.querySelectorAll('.command-line').forEach(line => {
-                    line.contentEditable = 'false';
-                    line.classList.add('disabled');
-                });
-                document.querySelectorAll('.cursor-indicator').forEach(cursor => cursor.remove());
-
-                TerminalMenu.show(
-                    [
-                        { label: 'Chyperpunk Manifesto', value: manifestos[0] },
-                        { label: 'Open Access Manifesto', value: manifestos[1] },
-                        { label: 'SIMPLETS Manifesto', value: manifestos[2] }
-                    ],
-                    'Select a Manifesto:',
-                    (selectedValue) => {
-                        console.log('🔍 DIAGNOSTIC: Manifesto onSelect triggered.');
-                        const terminalOutput = document.getElementById('terminal-output');
-                        console.log('🔍 DIAGNOSTIC: terminalOutput:', terminalOutput ? 'found' : 'NOT FOUND');
-                        
-                        const existingResponse = terminalOutput.querySelector('.manifesto-content');
-                        if (existingResponse) existingResponse.remove();
-
-                        const responseLine = Utils.createElement('div', ['manifesto-content']);
-                        responseLine.innerHTML = selectedValue.replace(/\n/g, '<br>');
-                        terminalOutput.appendChild(responseLine);
-                        console.log('🔍 DIAGNOSTIC: Manifesto content displayed.');
-
-                        console.log('🔍 DIAGNOSTIC: Calling TerminalInput.addPrompt...');
-                        TerminalInput.addPrompt(terminalOutput);
-                        console.log('🔍 DIAGNOSTIC: TerminalInput.addPrompt called.');
-
-                        const newCommandLine = terminalOutput.querySelector('.command-line[contenteditable="true"]');
-                        console.log('🔍 DIAGNOSTIC: newCommandLine found after addPrompt:', newCommandLine ? 'found' : 'NOT FOUND', newCommandLine);
-                        
-                        if (newCommandLine) {
-                            console.log('🔍 DIAGNOSTIC: Focusing newCommandLine...');
-                            newCommandLine.focus();
-                            console.log('🔍 DIAGNOSTIC: newCommandLine focused. Active element:', document.activeElement);
-                            
-                            // Explicitly set selection/cursor position
-                            const selection = window.getSelection();
-                            selection.removeAllRanges(); // Clear existing ranges first
-                            const range = document.createRange();
-                            range.selectNodeContents(newCommandLine); // Select all content (empty for new line)
-                            range.collapse(true); // Collapse to the start of the node
-                            selection.addRange(range); // Apply the new range
-                            console.log('🔍 DIAGNOSTIC: Selection set in newCommandLine. Range count:', selection.rangeCount);
-
-                        } else {
-                            console.error('🔴 ERROR: newCommandLine not found after TerminalInput.addPrompt!');
-                        }
-                    },
-                    () => { // onCancel
-                        console.log('🔍 DIAGNOSTIC: Manifesto menu onCancel triggered!');
-                        TerminalInput.addPrompt(terminalOutput);
-                        const newCommandLine = terminalOutput.querySelector('.command-line[contenteditable="true"]');
-                        if (newCommandLine) newCommandLine.focus();
-                    }
-                );
-
-                return { menuActive: true };
-            }
-            case 'project': {
-                const isLight = document.body.classList.contains('light-theme');
-                const bgColor = isLight ? 'black' : 'white';
-                // Always generate new pairs
-                const indices1 = [Math.floor(window.crypto.getRandomValues(new Uint32Array(1))[0] / 4294967296 * 70), Math.floor(window.crypto.getRandomValues(new Uint32Array(1))[0] / 4294967296 * 70)];
-                const indices2 = [Math.floor(window.crypto.getRandomValues(new Uint32Array(1))[0] / 4294967296 * 70), Math.floor(window.crypto.getRandomValues(new Uint32Array(1))[0] / 4294967296 * 70)];
-                // Always use latest generateRandomCharacterPairSVG (with indices)
-                const svg1 = Utils.generateRandomCharacterPairSVG(bgColor, indices1);
-                const svg2 = Utils.generateRandomCharacterPairSVG(bgColor, indices2);
-                function svgToDataURL(svg) {
-                    return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
-                }
-                const img1 = `<img class="theme-svg" data-indices="${indices1.join(',')}" src="${svgToDataURL(svg1)}" width="300" height="300" alt="NFT Example 1" style="display:inline-block;vertical-align:middle;" />`;
-                const img2 = `<img class="theme-svg" data-indices="${indices2.join(',')}" src="${svgToDataURL(svg2)}" width="300" height="300" alt="NFT Example 2" style="display:inline-block;vertical-align:middle;" />`;
-                const projectTitle = '<strong>SIMPLETS Project</strong>';
-                const projectDesc = `SIMPLETS is a multichain web3 brand<br>\
+        );
+        return { menuActive: true };
+    },
+    handleProjectCommand() {
+        const isLight = document.body.classList.contains('light-theme');
+        const bgColor = isLight ? 'black' : 'white';
+        const indices1 = [Math.floor(window.crypto.getRandomValues(new Uint32Array(1))[0] / 4294967296 * 70), Math.floor(window.crypto.getRandomValues(new Uint32Array(1))[0] / 4294967296 * 70)];
+        const indices2 = [Math.floor(window.crypto.getRandomValues(new Uint32Array(1))[0] / 4294967296 * 70), Math.floor(window.crypto.getRandomValues(new Uint32Array(1))[0] / 4294967296 * 70)];
+        const svg1 = Utils.generateRandomCharacterPairSVG(bgColor, indices1);
+        const svg2 = Utils.generateRandomCharacterPairSVG(bgColor, indices2);
+        function svgToDataURL(svg) {
+            return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+        }
+        const img1 = `<img class="theme-svg" data-indices="${indices1.join(',')}" src="${svgToDataURL(svg1)}" width="300" height="300" alt="NFT Example 1" style="display:inline-block;vertical-align:middle;" />`;
+        const img2 = `<img class="theme-svg" data-indices="${indices2.join(',')}" src="${svgToDataURL(svg2)}" width="300" height="300" alt="NFT Example 2" style="display:inline-block;vertical-align:middle;" />`;
+        const projectTitle = '<strong>SIMPLETS Project</strong>';
+        const projectDesc = `SIMPLETS is a multichain web3 brand<br>\
 A pseudonym supportive community aiming to boost pseudonym contributors in web3 space.<br>\
 A web3 brand empowering pseudonymous contributors, building a supportive community at the intersection of identity and innovation.`;
-                const aboveText = '<em>Random Character Pair NFT Example</em>';
-                const belowText = '<em>Every image is unique. Theme switch = new art!</em>';
-                return `
+        const aboveText = '<em>Random Character Pair NFT Example</em>';
+        const belowText = '<em>Every image is unique. Theme switch = new art!</em>';
+        return `
 <div class="project-svg-block">
   <div class="project-above-text">${aboveText}</div>
   <div class="project-svg" style="display:flex;justify-content:center;margin:16px 0;gap:16px;">
@@ -567,35 +590,76 @@ A web3 brand empowering pseudonymous contributors, building a supportive communi
   <div class="project-below-text">${belowText}</div>
 </div>
 `;
-            }
-            case 'minting':
-                return getTranslation('commands.minting');
-            case 'roadmap':
-                return getTranslation('commands.roadmap');
-            case 'team':
-                return getTranslation('commands.team');
-            case 'links':
-                return getTranslation('commands.links');
-            case 'legal':
-                return getTranslation('commands.legal');
-            case 'language':
-                return getTranslation('commands.language');
-            default:
-                // Check for hidden set lang command
-                if (lowercaseCommand.startsWith('set lang ')) {
-                    const langCode = lowercaseCommand.split(' ')[2];
-                    const validLangCodes = ['en', 'hi', 'zh', 'es', 'pt', 'ru', 'id', 'vi', 'ja', 'tr', 'de', 'fr', 'ar', 'th', 'uk'];
-
-                    if (validLangCodes.includes(langCode)) {
-                        window.currentLanguage = langCode;
-                        return getTranslation('languageChanged') + langCode;
-                    } else {
-                        return getTranslation('invalidLanguage');
-                    }
-                }
-                return getTranslation('commandNotFound') + command;
+    },
+    handleMintingCommand() {
+        return getTranslation('commands.minting');
+    },
+    handleRoadmapCommand() {
+        return getTranslation('commands.roadmap');
+    },
+    handleTeamCommand() {
+        return getTranslation('commands.team');
+    },
+    handleLinksCommand() {
+        return getTranslation('commands.links');
+    },
+    handleLegalCommand() {
+        return getTranslation('commands.legal');
+    },
+    handleLanguageCommand() {
+        // This command might be intended to show current lang or options; for now, simple translation
+        return getTranslation('commands.language'); 
+    },
+    handleSetLangCommand(fullCommand) {
+        const parts = fullCommand.toLowerCase().trim().split(' '); // Ensure lowercase and split
+        const langCode = parts[2]; // command is 'set lang code'
+        const validLangCodes = ['en', 'hi', 'zh', 'es', 'pt', 'ru', 'id', 'vi', 'ja', 'tr', 'de', 'fr', 'ar', 'th', 'uk'];
+        if (langCode && validLangCodes.includes(langCode)) {
+            window.currentLanguage = langCode;
+            // It might be good to re-render any language-specific elements or refresh the prompt
+            return getTranslation('languageChanged') + langCode;
+        } else {
+            return getTranslation('invalidLanguage');
         }
     },
+    handleUnknownCommand(fullCommand) {
+        return getTranslation('commandNotFound') + fullCommand.split(' ')[0]; // Show only the command part
+    },
+
+    // Fully Populated Command Handlers Map
+    commandHandlers: {
+        'help': function() { return this.handleHelpCommand(); },
+        'about': function() { return this.handleAboutCommand(); },
+        'stop': function() { return this.handleStopCommand(); },
+        'clear': function() { return this.handleClearCommand(); },
+        'video': function(command) { return this.handleVideoCommand(command); },
+        'manifesto': function() { return this.handleManifestoCommand(); },
+        'project': function() { return this.handleProjectCommand(); },
+        'minting': function() { return this.handleMintingCommand(); },
+        'roadmap': function() { return this.handleRoadmapCommand(); },
+        'team': function() { return this.handleTeamCommand(); },
+        'links': function() { return this.handleLinksCommand(); },
+        'legal': function() { return this.handleLegalCommand(); },
+        'language': function() { return this.handleLanguageCommand(); }
+        // 'set' for 'set lang' will be handled in process, unknown handled by handleUnknownCommand
+    },
+
+    process(command) {
+        const lowercaseCommand = command.toLowerCase().trim();
+        const parts = lowercaseCommand.split(' ');
+        const baseCommand = parts[0];
+
+        if (baseCommand === 'set' && parts[1] === 'lang' && parts.length === 3) {
+            return this.handleSetLangCommand(lowercaseCommand);
+        }
+
+        if (this.commandHandlers[baseCommand]) {
+            return this.commandHandlers[baseCommand].call(this, command);
+        }
+        
+        return this.handleUnknownCommand(command); // Pass original command for context
+    },
+
     stopVideo() {
         const videoToStop = document.querySelector('.terminal-background-video');
         const overlayToStop = document.querySelector('.video-text-overlay');
@@ -655,33 +719,15 @@ A web3 brand empowering pseudonymous contributors, building a supportive communi
     }
 };
 
-// --- THEME SWITCH HANDLER ---
-(function() {
-    const themeButton = document.getElementById('terminal-logo');
-    if (!themeButton) return;
-    themeButton.addEventListener('click', () => {
-        setTimeout(() => {
-            updateAllThemeSVGs();
-        }, 200);
-    });
-})();
-
-// When user runs project again, clear indices so new pairs are generated
-(function() {
-    const terminalOutput = document.getElementById('terminal-output');
-    if (!terminalOutput) return;
-    terminalOutput.addEventListener('DOMNodeInserted', function(e) {
-        if (e.target && e.target.innerText && e.target.innerText.includes('SIMPLETS Project')) {
-            // Clear indices so next run generates new
-            window._projectSVGPairIndices = null;
-        }
-    });
-})();
+// ... (rest of the code remains the same)
 
 // =====================
 // Terminal Input Handler
 // =====================
 const TerminalInput = {
+    commandHistory: [],
+    historyIndex: -1,
+    currentInputBuffer: '',
     addPrompt(terminalOutput) {
         const existingCursor = document.querySelector('.cursor-indicator');
         if (existingCursor) existingCursor.remove();
@@ -740,6 +786,13 @@ const TerminalInput = {
             // Store cursor state before processing command
             const currentCursor = document.querySelector('.cursor-indicator');
 
+            // Save command to history if not empty or duplicate
+            if (command && (TerminalInput.commandHistory.length === 0 || TerminalInput.commandHistory[TerminalInput.commandHistory.length - 1] !== command)) {
+                TerminalInput.commandHistory.push(command);
+            }
+            TerminalInput.historyIndex = -1;
+            TerminalInput.currentInputBuffer = '';
+
             commandLine.contentEditable = 'false';
 
             if (command) {
@@ -774,13 +827,43 @@ const TerminalInput = {
             if (e.key === 'Enter') {
                 e.preventDefault();
                 handleCommand();
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                if (TerminalInput.commandHistory.length > 0) {
+                    if (TerminalInput.historyIndex === -1) {
+                        TerminalInput.currentInputBuffer = commandLine.textContent;
+                        TerminalInput.historyIndex = TerminalInput.commandHistory.length - 1;
+                    } else if (TerminalInput.historyIndex > 0) {
+                        TerminalInput.historyIndex--;
+                    }
+                    // Always ensure .command-line contains only text
+                    commandLine.textContent = TerminalInput.commandHistory[TerminalInput.historyIndex];
+                    requestAnimationFrame(() => {
+                        Utils.focusAndSetCursorAtEnd(commandLine);
+                        Utils.updateVisualCursor(commandLine);
+                    });
+                }
+            } else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                if (TerminalInput.commandHistory.length > 0 && TerminalInput.historyIndex !== -1) {
+                    if (TerminalInput.historyIndex < TerminalInput.commandHistory.length - 1) {
+                        TerminalInput.historyIndex++;
+                        // Always ensure .command-line contains only text
+                        commandLine.textContent = TerminalInput.commandHistory[TerminalInput.historyIndex];
+                    } else {
+                        TerminalInput.historyIndex = -1;
+                        commandLine.textContent = TerminalInput.currentInputBuffer || '';
+                    }
+                    requestAnimationFrame(() => {
+                        Utils.focusAndSetCursorAtEnd(commandLine);
+                        Utils.updateVisualCursor(commandLine);
+                    });
+                }
             }
         });
     },
     initGlobalKeyHandling() {
         document.addEventListener('keydown', (e) => {
-            console.log('🔍 DIAGNOSTIC: Global keydown event:', e.key);
-            
             // Allow Cmd+C (or Ctrl+C) for copying text
             if ((e.metaKey || e.ctrlKey) && e.key === 'c') {
                 // Don't prevent default or stop propagation - let the browser handle the copy
@@ -800,33 +883,32 @@ const TerminalInput = {
                 
                 const menuElement = document.querySelector('.terminal-menu'); 
                 if (!menuElement || menuElement.style.display === 'none') {
-                    console.log('🔍 DIAGNOSTIC: Active command line is focused. Letting browser handle character:', key);
                     return; 
                 }
             }
             
             // DIAGNOSTIC: Log active element before any focus changes
-            console.log('🔍 DIAGNOSTIC: Active element before focus change:', document.activeElement);
-            console.log('🔍 DIAGNOSTIC: Active element is command line?', document.activeElement.classList?.contains('command-line'));
+            // console.log('🔍 DIAGNOSTIC: Active element before focus change:', document.activeElement);
+            // console.log('🔍 DIAGNOSTIC: Active element is command line?', document.activeElement.classList?.contains('command-line'));
             
             // CRITICAL FIX: Check if we're in a post-manifesto state
             // If there's a manifesto content element and an editable command line after it,
             // we should not redirect input to the last command line
             const manifestoContent = document.querySelector('.manifesto-content');
-            console.log('🔍 DIAGNOSTIC: Manifesto content found?', !!manifestoContent);
+            // console.log('🔍 DIAGNOSTIC: Manifesto content found?', !!manifestoContent);
             
             if (manifestoContent) {
                 // Find all command lines that come after the manifesto content
                 const allNodes = Array.from(document.getElementById('terminal-output').childNodes);
                 const manifestoIndex = allNodes.indexOf(manifestoContent);
-                console.log('🔍 DIAGNOSTIC: Manifesto index in nodes:', manifestoIndex);
+                // console.log('🔍 DIAGNOSTIC: Manifesto index in nodes:', manifestoIndex);
                 
                 if (manifestoIndex !== -1) {
                     // Look for an editable command line after the manifesto
                     let foundEditableLine = false;
                     for (let i = manifestoIndex + 1; i < allNodes.length; i++) {
                         const node = allNodes[i];
-                        console.log('🔍 DIAGNOSTIC: Checking node after manifesto:', node);
+                        // console.log('🔍 DIAGNOSTIC: Checking node after manifesto:', node);
                         
                         const editableLine = node.querySelector?.('.command-line[contenteditable="true"]');
                         if (editableLine) {
@@ -835,27 +917,31 @@ const TerminalInput = {
                             
                             // We found an editable line after the manifesto, so we should use that
                             // and not redirect input elsewhere
-                            if (!editableLine.matches(':focus') && e.key.length === 1) {
-                                console.log('🔍 DIAGNOSTIC: Focusing editable line after manifesto');
+                            if (!editableLine.matches(':focus') && e.key.length === 1 && !e.metaKey && !e.ctrlKey && !e.altKey) {
+                                console.log('🔍 DIAGNOSTIC: Focusing editable line after manifesto and preparing for input');
                                 e.preventDefault();
-                                editableLine.focus();
+                                Utils.focusAndSetCursorAtStart(editableLine); // Sets focus and cursor at start
+                                // Now insert the character that was typed
+                                document.execCommand('insertText', false, e.key); 
                                 return;
                             }
-                            return; // Already focused or not a character key
+                            // If already focused or not a simple character key, let default behavior or other handlers manage.
+                            // This prevents interfering with Enter, Tab, etc. if the line is already focused.
+                            return; 
                         }
                     }
-                    console.log('🔍 DIAGNOSTIC: Found editable line after manifesto?', foundEditableLine);
+                    // console.log('🔍 DIAGNOSTIC: Found editable line after manifesto?', foundEditableLine);
                 }
             }
-            
+
             // Original behavior for non-manifesto cases
             const commandLines = document.querySelectorAll('.command-line');
-            console.log('🔍 DIAGNOSTIC: Total command lines found:', commandLines.length);
-            
+            // console.log('🔍 DIAGNOSTIC: Total command lines found:', commandLines.length);
+        
             const lastCommandLine = commandLines[commandLines.length - 1];
-            console.log('🔍 DIAGNOSTIC: Last command line:', lastCommandLine);
-            console.log('🔍 DIAGNOSTIC: Last command line editable?', lastCommandLine?.contentEditable === 'true');
-
+            // console.log('🔍 DIAGNOSTIC: Last command line:', lastCommandLine);
+            // console.log('🔍 DIAGNOSTIC: Last command line editable?', lastCommandLine?.contentEditable === 'true');
+        
             if (lastCommandLine && lastCommandLine.contentEditable !== 'true') {
                 console.log('🔍 DIAGNOSTIC: Making last command line editable');
                 lastCommandLine.contentEditable = 'true';
@@ -963,73 +1049,76 @@ document.addEventListener('DOMContentLoaded', () => {
 
     animateLoadingScreen();
 
-    const transitionToTerminal = () => {
-        clearInterval(loadingInterval);
+// Helper function for terminal logo click
+function handleTerminalLogoClick() {
+    document.body.classList.toggle('dark-theme');
+    document.body.classList.toggle('light-theme');
 
-        loadingScreen.classList.add('fade-out');
+    updateAllThemeSVGs();
 
-        setTimeout(() => {
-            loadingScreen.style.display = 'none';
+    const currentTheme = document.body.classList.contains('light-theme') ? 'Light' : 'Dark';
+    const aboutMessage = `${getTranslation('currentTheme')}${currentTheme}`;
 
-            const welcomeMessage = Utils.createElement('div', ['welcome-line']);
-            welcomeMessage.innerHTML = getTranslation('welcome');
-            terminalOutput.appendChild(welcomeMessage);
+    const responseLine = Utils.createElement('div');
+    responseLine.innerHTML = aboutMessage;
+    terminalOutput.appendChild(responseLine);
 
-            const terminalLogo = Utils.createElement('div', [], '□_□');
-            terminalLogo.id = 'terminal-logo';
+    TerminalInput.addPrompt(terminalOutput);
+    Utils.scrollToBottom(terminalOutput);
+}
 
-            terminalLogo.addEventListener('click', () => {
-                document.body.classList.toggle('dark-theme');
-                document.body.classList.toggle('light-theme');
+// Helper function to set up the terminal interface after loading
+function setupTerminalInterface() {
+    loadingScreen.style.display = 'none';
 
-                updateAllThemeSVGs();
+    const welcomeMessage = Utils.createElement('div', ['welcome-line']);
+    welcomeMessage.innerHTML = getTranslation('welcome');
+    terminalOutput.appendChild(welcomeMessage);
 
-                const currentTheme = document.body.classList.contains('light-theme') ? 'Light' : 'Dark';
-                const aboutMessage = `${getTranslation('currentTheme')}${currentTheme}`;
+    const terminalLogo = Utils.createElement('div', [], '□_□');
+    terminalLogo.id = 'terminal-logo';
 
-                const responseLine = Utils.createElement('div');
-                responseLine.innerHTML = aboutMessage;
-                terminalOutput.appendChild(responseLine);
+    terminalLogo.addEventListener('click', handleTerminalLogoClick);
 
-                TerminalInput.addPrompt(terminalOutput);
+    terminal.appendChild(terminalLogo);
 
-                Utils.scrollToBottom(terminalOutput);
-            });
+    setTimeout(() => {
+        if (terminalLogo) terminalLogo.style.opacity = '1';
+    }, 1500);
 
-            terminal.appendChild(terminalLogo);
+    WaveAnimation.create(terminal);
 
-            setTimeout(() => {
-                if (terminalLogo) terminalLogo.style.opacity = '1';
-            }, 1500);
+    TerminalInput.addPrompt(terminalOutput);
+    TerminalInput.initGlobalKeyHandling();
 
-            WaveAnimation.create(terminal);
+    // We'll add the cursor indicator to the command line instead of the input area
+    setTimeout(() => {
+        const commandLine = document.querySelector('.command-line[contenteditable="true"]');
+        if (commandLine) {
+            // Only add cursor if it doesn't exist yet
+            if (!document.querySelector('.cursor-indicator')) {
+                const cursorElement = CursorIndicator.create();
+                commandLine.parentNode.appendChild(cursorElement);
+            }
+        }
+    }, 100);
 
-            TerminalInput.addPrompt(terminalOutput);
-            TerminalInput.initGlobalKeyHandling();
+    const terminalOutputElement = document.getElementById('terminal-output');
+    terminalOutputElement.style.opacity = '0';
+    terminalOutputElement.style.transform = 'translateY(20px)';
 
-            // We'll add the cursor indicator to the command line instead of the input area
-            setTimeout(() => {
-                const commandLine = document.querySelector('.command-line[contenteditable="true"]');
-                if (commandLine) {
-                    // Only add cursor if it doesn't exist yet
-                    if (!document.querySelector('.cursor-indicator')) {
-                        const cursorElement = CursorIndicator.create();
-                        commandLine.parentNode.appendChild(cursorElement);
-                    }
-                }
-            }, 100);
+    setTimeout(() => {
+        terminalOutputElement.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+        terminalOutputElement.style.opacity = '1';
+        terminalOutputElement.style.transform = 'translateY(0)';
+    }, 500);
+}
 
-            const terminalOutputElement = document.getElementById('terminal-output');
-            terminalOutputElement.style.opacity = '0';
-            terminalOutputElement.style.transform = 'translateY(20px)';
-
-            setTimeout(() => {
-                terminalOutputElement.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-                terminalOutputElement.style.opacity = '1';
-                terminalOutputElement.style.transform = 'translateY(0)';
-            }, 500);
-        }, 1000);
-    };
+const transitionToTerminal = () => {
+    clearInterval(loadingInterval);
+    loadingScreen.classList.add('fade-out');
+    setTimeout(setupTerminalInterface, 1000);
+};
 
     setTimeout(transitionToTerminal, 4000);
 

@@ -200,6 +200,86 @@ body::-webkit-scrollbar,
     50% { opacity: 1; }
 }
 
+/* --- Terminal Consistency Styles --- */
+
+#terminal-output {
+    /* font-family: 'Share Tech Mono', monospace !important; */ /* REMOVED - inherit Inconsolata */
+    font-size: 18px; /* Keep base size */
+    line-height: 1.4; /* Keep base line height */
+}
+
+/* Reset margins for common block elements inside the output area */
+#terminal-output > div,
+#terminal-output p,
+#terminal-output pre {
+    margin-top: 0;
+    margin-bottom: 0; /* REMOVED spacing */
+    font-size: 1em; /* Inherit base size */
+    font-family: inherit; /* Ensure font inheritance */
+    line-height: inherit; /* Ensure line-height inheritance */
+}
+
+/* Ensure links within output also use terminal font */
+#terminal-output a {
+     font-family: inherit; /* Inherit Inconsolata */
+     /* Add color/decoration if needed */
+}
+
+/* REMOVE space below each prompt line */
+.prompt-line {
+    margin-bottom: 0 !important; /* REMOVED spacing, keep important to override earlier rule */
+}
+
+/* Ensure font consistency for specific elements */
+.welcome-line,
+.terminal-command,
+.user-info,
+.path,
+.command-line,
+.manifesto-content,
+.command-line-container {
+    font-family: inherit; /* Ensure they inherit from #terminal-output */
+    font-size: 1em; /* Relative to parent (#terminal-output) */
+}
+
+/* Adjustments for specific command outputs */
+.project-svg-block {
+    padding: 0;
+    margin-bottom: 0; /* REMOVED spacing */
+}
+
+.project-svg-block .project-title,
+.project-svg-block .project-desc,
+.project-svg-block .project-above-text,
+.project-svg-block .project-below-text {
+     font-family: inherit;
+     font-size: 1em;
+     margin: 0 0 0.3em 0; /* Keep minimal spacing between internal lines */
+     font-style: normal; /* Override italic from em */
+     font-weight: normal; /* Override bold */
+}
+/* Keep title bold */
+.project-svg-block .project-title strong {
+    font-weight: bold;
+}
+
+.manifesto-content {
+     margin-top: 0; /* Adjusted for no spacing */
+     margin-bottom: 0; /* Adjusted for no spacing */
+}
+
+/* Ensure cursor aligns correctly */
+.cursor-indicator {
+    height: calc(1em * 1.2); /* Adjust height */
+    background-color: var(--text-color); /* Ensure visibility */
+}
+
+/* Ensure the input line also matches */
+.command-line {
+     line-height: 1.2; /* Keep line-height tight for input */
+}
+
+
 @keyframes blink-cursor {
     from, to { opacity: 1; }
     50% { opacity: 0; }
@@ -304,7 +384,7 @@ body::-webkit-scrollbar,
     text-transform: uppercase;
     letter-spacing: 0.5px;
     line-height: 1.1;
-    font-size: 0.9em;
+    font-size: 1em; /* Welcome line consistency */
 }
 
 #terminal-output, 
@@ -316,6 +396,23 @@ body::-webkit-scrollbar,
     color: var(--text-color);
     font-size: 18px;
     line-height: 1.4;
+}
+
+.terminal-menu .menu-title {
+    font-weight: bold;
+    padding: 10px;
+    background-color: transparent; /* Explicitly no background */
+    color: var(--text-color); /* Use general text color for visibility */
+    font-size: 1em; /* Welcome line consistency, inherits from 18px base */
+    border-bottom: 1px solid var(--border-color);
+}
+
+.terminal-menu .menu-item {
+    padding: 5px 10px;
+    cursor: pointer;
+    border-bottom: 1px dashed var(--border-color-light);
+    transition: background-color 0.2s, color 0.2s;
+    font-size: 1em; /* Welcome line consistency */
 }
 
 .manifesto-content {
