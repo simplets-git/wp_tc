@@ -59,11 +59,11 @@ once you become a holder, your reality may change forever.
             ],
             minting: `
 <strong>SIMPLETS Minting</strong><br>
-- <span class="terminal-command">Total Supply</span>: 10,000 unique terminal interfaces<br>
-- <span class="terminal-command">Mint Price</span>: 0.069 ETH<br>
-- <span class="terminal-command">Blockchain</span>: Ethereum<br>
-- <span class="terminal-command">Smart Contract</span>: In development<br>
-- <span class="terminal-command">Whitelist</span>: Coming soon<br>
+- <span class="terminal-command">total supply</span>: 10,000 unique terminal interfaces<br>
+- <span class="terminal-command">mint price</span>: 0.069 ETH<br>
+- <span class="terminal-command">blockchain</span>: Ethereum<br>
+- <span class="terminal-command">smart contract</span>: In development<br>
+- <span class="terminal-command">whitelist</span>: Coming soon<br>
 Minting will grant exclusive access to advanced terminal features.
             `,
             roadmap: `<pre style="margin:0; line-height:1.35;">
@@ -192,9 +192,9 @@ Sobald Sie ein Inhaber werden, könnte sich Ihre Realität für immer verändern
 <span style="font-size:0.97em;">
 - <span class="terminal-command">Gesamtangebot</span>: 10.000 einzigartige Terminal-Schnittstellen<br>
 - <span class="terminal-command">Prägepreis</span>: 0,069 ETH<br>
-- <span class="terminal-command">Blockchain</span>: Ethereum<br>
-- <span class="terminal-command">Smart Contract</span>: In Entwicklung<br>
-- <span class="terminal-command">Whitelist</span>: Demnächst<br>
+- <span class="terminal-command">blockchain</span>: Ethereum<br>
+- <span class="terminal-command">smart contract</span>: In Entwicklung<br>
+- <span class="terminal-command">whitelist</span>: Demnächst<br>
 </span>
 Die Prägung gewährt exklusiven Zugang zu erweiterten Terminal-Funktionen.
             `,

@@ -567,7 +567,7 @@ const TerminalCommands = {
     // Existing Handler Methods
     handleHelpCommand() {
         return `${getTranslation('availableCommands')}${CONFIG.availableCommands.map(cmd => 
-            `<span class="terminal-command">${cmd}</span>`
+            `<span class="terminal-command">${cmd.toLowerCase()}</span>`
         ).join(', ')}`;
     },
     handleAboutCommand() {

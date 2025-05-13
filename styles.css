@@ -386,18 +386,27 @@ body::-webkit-scrollbar,
 }
 
 .terminal-command {
-    background-color: var(--command-bg-color);
-    color: var(--command-text-color);
+    background-color: transparent;
+    color: var(--command-bg-color);
     padding: 0 1px;
-    border: 1px solid var(--border-color);
-    font-weight: bold;
+    border: none;
+    border-bottom: 2px solid var(--command-bg-color);
+    font-weight: normal;
     display: inline-block;
     margin: 0 1px;
-    text-transform: uppercase;
+    text-transform: none;
     letter-spacing: 0.5px;
     line-height: 1.1;
-    font-size: 1em; /* Welcome line consistency */
+    font-size: 1em;
+    transition: color 0.2s, border-bottom-color 0.2s;
 }
+
+.light-theme .terminal-command {
+    color: var(--command-text-color);
+    border-bottom: 2px solid var(--command-text-color);
+}
+
+
 
 #terminal-output, 
 .prompt-line, 
