@@ -194,6 +194,15 @@ body::-webkit-scrollbar,
     pointer-events: none;
 }
 
+.cursor-indicator.underscore {
+    width: 8px;
+    height: 2px;
+    top: auto;
+    bottom: 0;
+    margin-bottom: 0;
+    background-color: var(--text-color);
+}
+
 .command-line::after {
     display: none;
 }

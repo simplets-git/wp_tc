@@ -337,6 +337,10 @@ const CursorIndicator = {
     create() {
         const cursor = document.createElement('span');
         cursor.classList.add('cursor-indicator');
+        // Apply the current cursor style from CONFIG
+        if (CONFIG.cursorStyle === 'underscore') {
+            cursor.classList.add('underscore');
+        }
         return cursor;
     },
 
@@ -393,14 +397,15 @@ const CursorIndicator = {
 window.currentLanguage = 'en';
 
 const CONFIG = {
-    version: 'v.0.60.6',
+    version: 'v.0.6',
     username: 'anonymous',
     hostname: 'simplets',
     availableCommands: [
         'help', 'clear', 'video', 'stop',
         'about', 'manifesto', 'project', 'minting',
-        'roadmap', 'team', 'links', 'legal', 'language'
-    ]
+        'roadmap', 'team', 'links', 'legal', 'language', 'cursor', 'set'
+    ],
+    cursorStyle: 'block' // Default cursor style
 };
 
 // =====================
@@ -689,6 +694,67 @@ A web3 brand empowering pseudonymous contributors, building a supportive communi
             return getTranslation('invalidLanguage');
         }
     },
+    handleCursorCommand() {
+        document.querySelectorAll('.command-line').forEach(line => {
+            line.contentEditable = 'false';
+            line.classList.add('disabled');
+        });
+        document.querySelectorAll('.cursor-indicator').forEach(cursor => cursor.remove());
+        
+        // Define cursor options with clear labels
+        const blockCursorLabel = 'Block Cursor (■)';
+        const underscoreCursorLabel = 'Underscore Cursor (_)';
+        
+        TerminalMenu.show(
+            [
+                { label: blockCursorLabel, value: 'block' },
+                { label: underscoreCursorLabel, value: 'underscore' }
+            ],
+            'Select Cursor Style',
+            (selectedValue) => {
+                // Set the cursor style in CONFIG
+                CONFIG.cursorStyle = selectedValue;
+                
+                // Get the appropriate label based on the selected value
+                const selectedLabel = (selectedValue === 'underscore') ? 
+                    underscoreCursorLabel : blockCursorLabel;
+                
+                // Create a new cursor with the selected style
+                const newCursor = CursorIndicator.create();
+                
+                // Update all existing cursors
+                document.querySelectorAll('.cursor-indicator').forEach(cursor => {
+                    if (CONFIG.cursorStyle === 'underscore') {
+                        cursor.classList.add('underscore');
+                    } else {
+                        cursor.classList.remove('underscore');
+                    }
+                });
+                
+                const terminalOutput = document.getElementById('terminal-output');
+                const responseLine = Utils.createElement('div');
+                responseLine.innerHTML = `Cursor style changed to: <span class="terminal-command">${selectedLabel}</span>`;
+                terminalOutput.appendChild(responseLine);
+                
+                TerminalInput.addPrompt(terminalOutput);
+                const newCommandLine = terminalOutput.querySelector('.command-line[contenteditable="true"]');
+                if (newCommandLine) {
+                    newCommandLine.focus();
+                    // Attach the cursor to the command line
+                    if (newCommandLine.parentNode) {
+                        newCommandLine.parentNode.appendChild(newCursor);
+                    }
+                }
+            },
+            () => { 
+                const terminalOutput = document.getElementById('terminal-output');
+                TerminalInput.addPrompt(terminalOutput);
+                const newCommandLine = terminalOutput.querySelector('.command-line[contenteditable="true"]');
+                if (newCommandLine) newCommandLine.focus();
+            }
+        );
+        return { menuActive: true };
+    },
     handleUnknownCommand(fullCommand) {
         return getTranslation('commandNotFound') + fullCommand.split(' ')[0]; // Show only the command part
     },
@@ -696,10 +762,10 @@ A web3 brand empowering pseudonymous contributors, building a supportive communi
     // Fully Populated Command Handlers Map
     commandHandlers: {
         'help': function() { return this.handleHelpCommand(); },
-        'about': function() { return this.handleAboutCommand(); },
-        'stop': function() { return this.handleStopCommand(); },
         'clear': function() { return this.handleClearCommand(); },
         'video': function(command) { return this.handleVideoCommand(command); },
+        'stop': function() { return this.handleStopCommand(); },
+        'about': function() { return this.handleAboutCommand(); },
         'manifesto': function() { return this.handleManifestoCommand(); },
         'project': function() { return this.handleProjectCommand(); },
         'minting': function() { return this.handleMintingCommand(); },
@@ -707,7 +773,8 @@ A web3 brand empowering pseudonymous contributors, building a supportive communi
         'team': function() { return this.handleTeamCommand(); },
         'links': function() { return this.handleLinksCommand(); },
         'legal': function() { return this.handleLegalCommand(); },
-        'language': function() { return this.handleLanguageCommand(); }
+        'language': function() { return this.handleLanguageCommand(); },
+        'cursor': function() { return this.handleCursorCommand(); }
         // 'set' for 'set lang' will be handled in process, unknown handled by handleUnknownCommand
     },
 
