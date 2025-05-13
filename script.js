@@ -397,7 +397,7 @@ const CursorIndicator = {
 window.currentLanguage = 'en';
 
 const CONFIG = {
-    version: 'v.0.6',
+    version: 'v.0.7',
     username: 'anonymous',
     hostname: 'simplets',
     availableCommands: [
@@ -863,8 +863,8 @@ const TerminalInput = {
     historyIndex: -1,
     currentInputBuffer: '',
     addPrompt(terminalOutput) {
-        const existingCursor = document.querySelector('.cursor-indicator');
-        if (existingCursor) existingCursor.remove();
+        // Remove all existing cursors to ensure only one is visible
+        document.querySelectorAll('.cursor-indicator').forEach(cursor => cursor.remove());
 
         const existingActiveLines = document.querySelectorAll('.command-line');
         existingActiveLines.forEach(line => line.contentEditable = 'false');
@@ -883,9 +883,12 @@ const TerminalInput = {
         const commandLineContainer = promptLine.querySelector('.command-line-container');
         const commandLine = promptLine.querySelector('.command-line');
 
-        // Add cursor to container
+        // Add cursor to container with the current style
         const cursor = document.createElement('span');
         cursor.classList.add('cursor-indicator');
+        if (CONFIG.cursorStyle === 'underscore') {
+            cursor.classList.add('underscore');
+        }
         commandLineContainer.appendChild(cursor);
 
         // Function to update cursor position
