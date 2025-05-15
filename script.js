@@ -186,11 +186,11 @@ const WaveAnimation = {
             svg.style.height = '100%';
             svgContainer.appendChild(svg);
 
-            // Simplified mobile detection - just check screen width
+            // Enhanced mobile detection with proper sizing
             const isMobile = window.innerWidth < 768;
             const numRows = Math.max(40, Math.ceil(window.innerHeight / 25));
             const numCols = isMobile ? 2 : 12;
-            const cellWidth = 25;
+            const cellWidth = 25; // Standard cell width
             const cellHeight = 25;
 
             const gradientIntensities = [];
@@ -1139,13 +1139,47 @@ const TerminalInput = {
 // Main Initialization
 // =====================
 document.addEventListener('DOMContentLoaded', () => {
-    const isMobile = window.innerWidth <= 768;
-    if (isMobile) {
+    // Enhanced mobile detection function
+    const checkMobileView = () => {
+        const isMobile = window.innerWidth <= 768;
         const mobileView = document.getElementById('mobile-view');
-        const aboutInfo = document.getElementById('about-info');
-        aboutInfo.innerHTML = getTranslation('commands.about');
-        mobileView.style.display = 'block';
-    }
+        const terminalOutput = document.getElementById('terminal-output');
+        
+        if (isMobile) {
+            // Setup mobile view
+            const aboutInfo = document.getElementById('about-info');
+            aboutInfo.innerHTML = getTranslation('commands.about');
+            mobileView.style.display = 'block';
+            
+            // Adjust terminal for mobile
+            document.body.classList.add('mobile-device');
+            
+            // Ensure animations are properly sized
+            const sideBoxes = document.querySelectorAll('.terminal-side-box');
+            sideBoxes.forEach(box => {
+                box.style.width = '50px';
+            });
+        } else {
+            // Reset to desktop view if needed
+            if (mobileView.style.display === 'block') {
+                mobileView.style.display = 'none';
+                document.body.classList.remove('mobile-device');
+            }
+        }
+    };
+    
+    // Initial check
+    checkMobileView();
+    
+    // Listen for orientation changes and resizes
+    window.addEventListener('resize', () => {
+        checkMobileView();
+    });
+    
+    // Listen for orientation change on mobile devices
+    window.addEventListener('orientationchange', () => {
+        setTimeout(checkMobileView, 100);
+    });
     const asciiArt = `
  _______ _____ _______  _____         _______ _______ _______
  |______   |   |  |  | |_____] |      |______    |    |______
