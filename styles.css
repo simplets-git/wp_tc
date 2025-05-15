@@ -667,6 +667,8 @@ svg text {
         font-size: 36px !important;
         font-weight: bold !important;
         fill: white !important;
+        opacity: 1 !important;
+        visibility: visible !important;
     }
 }
 
