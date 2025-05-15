@@ -161,12 +161,33 @@ window._projectSVGPairIndices = null;
 // Wave Animation Module
 // =====================
 const WaveAnimation = {
+    // Track if animation has been created
+    initialized: false,
+    
+    // Get number of columns based on screen width
+    getColumnCount() {
+        const width = window.innerWidth;
+        if (width <= 480) return 2;      // Mobile phones
+        if (width <= 768) return 3;      // Small tablets
+        if (width <= 1024) return 6;     // Tablets/small laptops
+        if (width <= 1440) return 8;     // Laptops
+        return 12;                       // Large screens
+    },
+    
     create(container, isMobileView = false) {
+        // If already initialized, don't create again
+        if (this.initialized && document.querySelector('.terminal-side-container')) {
+            return;
+        }
+        
         // If no container is provided, exit early
         if (!container) {
             console.error('No container provided for WaveAnimation.create');
             return;
         }
+        
+        // Mark as initialized
+        this.initialized = true;
         
         const waveChars = [
             'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 
@@ -188,12 +209,12 @@ const WaveAnimation = {
             svg.setAttribute('width', '300');
             svg.setAttribute('height', `${window.innerHeight}`);
             svg.setAttribute('viewBox', `0 0 300 ${window.innerHeight}`);
-            svg.style.width = '300px';
+            svg.style.width = '100%';
             svg.style.height = '100%';
             svgContainer.appendChild(svg);
 
             const numRows = Math.max(40, Math.ceil(window.innerHeight / 25));
-            const numCols = 12; 
+            const numCols = this.getColumnCount(); // Responsive column count
             const cellWidth = 25;
             const cellHeight = 25;
 
@@ -216,7 +237,8 @@ const WaveAnimation = {
                     text.setAttribute('x', `${x * cellWidth}`);
                     text.setAttribute('y', `${y * cellHeight}`);
                     text.setAttribute('font-family', 'Share Tech Mono');
-                    text.setAttribute('font-size', '18');
+                    // Larger font size for mobile
+                    text.setAttribute('font-size', isMobileView ? '14' : '18');
                     text.setAttribute('fill', 'white');
                     
                     // Initialize with random character or space
@@ -322,28 +344,24 @@ const WaveAnimation = {
             };
 
             try {
-                // For mobile, create a dedicated container for side boxes if it doesn't exist
-                if (isMobileView) {
-                    let sideContainer = document.querySelector('.terminal-side-container.' + side);
-                    if (!sideContainer) {
-                        sideContainer = document.createElement('div');
-                        sideContainer.className = 'terminal-side-container ' + side;
-                        sideContainer.style.position = 'fixed';
-                        sideContainer.style.top = '0';
-                        sideContainer.style[side] = '0';
-                        sideContainer.style.height = '100%';
-                        sideContainer.style.width = '50px';
-                        sideContainer.style.display = 'grid';
-                        sideContainer.style.gridTemplateColumns = 'repeat(2, 1fr)';
-                        sideContainer.style.alignContent = 'center';
-                        sideContainer.style.zIndex = '1500';
-                        sideContainer.style.pointerEvents = 'none';
-                        document.body.appendChild(sideContainer);
-                    }
-                    sideContainer.appendChild(sideBox);
-                } else {
-                    container.appendChild(sideBox);
+                // Create a dedicated container for side boxes if it doesn't exist
+                let sideContainer = document.querySelector('.terminal-side-container.' + side);
+                if (!sideContainer) {
+                    sideContainer = document.createElement('div');
+                    sideContainer.className = 'terminal-side-container ' + side;
+                    sideContainer.style.position = 'fixed';
+                    sideContainer.style.top = '0';
+                    sideContainer.style[side] = '0';
+                    sideContainer.style.height = '100%';
+                    sideContainer.style.width = isMobileView ? '50px' : '300px';
+                    sideContainer.style.display = 'grid';
+                    sideContainer.style.gridTemplateColumns = `repeat(${this.getColumnCount()}, 1fr)`;
+                    sideContainer.style.alignContent = 'center';
+                    sideContainer.style.zIndex = '1500';
+                    sideContainer.style.pointerEvents = 'none';
+                    document.body.appendChild(sideContainer);
                 }
+                sideContainer.appendChild(sideBox);
                 requestAnimationFrame(animateWave);
             } catch (error) {
                 console.error('SVG Side Box Append Error:', error);
@@ -1341,16 +1359,12 @@ const transitionToTerminalOrMobile = () => {
                 
                 mobileMsg.appendChild(msgContent);
                 document.body.appendChild(mobileMsg);
-                
-                // Create animation boxes for mobile
-                WaveAnimation.create(document.body, true);
             } else {
                 mobileMsg.style.display = 'flex';
-                // Ensure animation boxes are created
-                if (!document.querySelector('.terminal-side-container')) {
-                    WaveAnimation.create(document.body, true);
-                }
             }
+            
+            // Always create animation boxes for mobile
+            WaveAnimation.create(document.body, true);
         } else {
             setupTerminalInterface();
         }
