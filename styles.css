@@ -602,8 +602,8 @@ svg text {
     }
     
     .terminal-side-box {
-        width: 50px !important;
-        max-width: 15% !important;
+        width: 25px !important;
+        max-width: 8% !important;
     }
     
     #mobile-view {
@@ -611,8 +611,9 @@ svg text {
         line-height: 1.5;
         width: 100%;
         box-sizing: border-box;
-        padding: 15px;
+        padding: 15px 30px;
         margin-top: 50px;
+        text-align: center;
     }
     
     #mobile-view h2 {
@@ -627,10 +628,19 @@ svg text {
         word-wrap: break-word;
     }
     
+    .mobile-warning {
+        margin-top: 30px;
+        padding: 15px;
+        border: 1px solid var(--text-color);
+        border-radius: 5px;
+        background-color: rgba(0, 0, 0, 0.3);
+    }
+    
     #mobile-view .mobile-note {
         font-style: italic;
         opacity: 0.8;
-        margin-top: 20px;
+        margin-top: 10px;
+        color: #4CAF50;
     }
     
     #about-info {
@@ -641,8 +651,13 @@ svg text {
     
     /* Ensure animation is properly sized */
     .terminal-side-animation svg {
-        width: 50px !important;
+        width: 25px !important;
         max-width: 100% !important;
+    }
+    
+    .terminal-side-animation text {
+        font-size: 18px !important;
+        font-weight: bold !important;
     }
 }
 

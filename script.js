@@ -189,9 +189,9 @@ const WaveAnimation = {
             // Enhanced mobile detection with proper sizing
             const isMobile = window.innerWidth < 768;
             const numRows = Math.max(40, Math.ceil(window.innerHeight / 25));
-            const numCols = isMobile ? 2 : 12;
-            const cellWidth = 25; // Standard cell width
-            const cellHeight = 25;
+            const numCols = isMobile ? 1 : 12; // Only 1 column on mobile
+            const cellWidth = 25; // Keep standard cell width for all devices
+            const cellHeight = 25; // Keep standard cell height for all devices
 
             const gradientIntensities = [];
             for (let x = 0; x < numCols; x++) {
@@ -1144,6 +1144,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const isMobile = window.innerWidth <= 768;
         const mobileView = document.getElementById('mobile-view');
         const terminalOutput = document.getElementById('terminal-output');
+        const terminalInputArea = document.getElementById('terminal-input-area');
         
         if (isMobile) {
             // Setup mobile view
@@ -1157,13 +1158,43 @@ document.addEventListener('DOMContentLoaded', () => {
             // Ensure animations are properly sized
             const sideBoxes = document.querySelectorAll('.terminal-side-box');
             sideBoxes.forEach(box => {
-                box.style.width = '50px';
+                box.style.width = '25px'; // Narrower on mobile
+            });
+            
+            // Hide CLI elements on mobile
+            document.querySelectorAll('.prompt-line').forEach(el => {
+                el.style.display = 'none';
+            });
+            
+            // Disable terminal input on mobile
+            if (terminalInputArea) {
+                terminalInputArea.style.display = 'none';
+            }
+            
+            // Hide any CLI messages that might have been displayed
+            document.querySelectorAll('.command-output').forEach(el => {
+                el.style.display = 'none';
             });
         } else {
             // Reset to desktop view if needed
             if (mobileView.style.display === 'block') {
                 mobileView.style.display = 'none';
                 document.body.classList.remove('mobile-device');
+                
+                // Show CLI elements again
+                document.querySelectorAll('.prompt-line').forEach(el => {
+                    el.style.display = 'flex';
+                });
+                
+                // Show terminal input again
+                if (terminalInputArea) {
+                    terminalInputArea.style.display = 'flex';
+                }
+                
+                // Show CLI messages again
+                document.querySelectorAll('.command-output').forEach(el => {
+                    el.style.display = 'block';
+                });
             }
         }
     };
