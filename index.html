@@ -9,148 +9,78 @@
     <link href="https://fonts.googleapis.com/css2?family=Inconsolata:wght@400;700&display=swap" rel="stylesheet">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     
-    <!-- Mobile-specific style that will load immediately -->
     <style>
+        /* Responsive styles for terminal */
         @media (max-width: 768px) {
-            #mobile-direct-view {
-                display: flex !important;
-                position: fixed;
-                top: 0;
-                left: 0;
+            #terminal {
                 width: 100%;
-                height: 100%;
-                background-color: black;
-                color: white;
-                z-index: 9999;
-                box-sizing: border-box;
-                font-family: 'Inconsolata', monospace;
-                overflow: hidden;
+                height: 100vh;
+                border-radius: 0;
+                margin: 0;
+                max-width: 100%;
+                max-height: 100%;
             }
             
-            #mobile-direct-view .mobile-content {
-                flex: 1;
-                padding: 20px;
-                z-index: 2;
-                position: relative;
+            #terminal-output {
+                padding: 10px;
+                font-size: 14px;
+                line-height: 1.4;
+                max-height: calc(100vh - 60px);
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
             }
             
-            #mobile-direct-view .mobile-animation-box {
-                width: 30px;
-                height: 100%;
-                position: relative;
-                overflow: hidden;
-                z-index: 1;
-            }
-            
-            #mobile-direct-view .mobile-animation-box.left {
-                border-right: 1px solid rgba(255, 255, 255, 0.1);
-            }
-            
-            #mobile-direct-view .mobile-animation-box.right {
-                border-left: 1px solid rgba(255, 255, 255, 0.1);
-            }
-            
-            #mobile-direct-view .mobile-animation-box .char {
-                position: absolute;
-                font-family: 'Share Tech Mono', monospace;
-                font-size: 18px;
-                color: white;
-                opacity: 0.7;
-            }
-            
-            /* Mobile loading screen */
-            #mobile-loading {
+            #terminal-input-area {
+                padding: 10px;
                 position: fixed;
-                top: 0;
+                bottom: 0;
                 left: 0;
-                width: 100%;
-                height: 100%;
-                background-color: black;
+                right: 0;
+                background-color: var(--bg-color);
+                border-top: 1px solid var(--border-color);
                 display: flex;
-                flex-direction: column;
+                align-items: center;
+            }
+            
+            #terminal-input {
+                flex: 1;
+                margin-left: 5px;
+                font-size: 16px;
+                height: 30px;
+            }
+            
+            /* Hide mobile view warning since we're using the main terminal */
+            #mobile-view {
+                display: none !important;
+            }
+            
+            /* Adjust loading screen for mobile */
+            #loading-screen {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                display: flex;
                 justify-content: center;
                 align-items: center;
-                z-index: 10000;
-                transition: opacity 0.5s ease-out;
+                background-color: var(--bg-color);
+                z-index: 1000;
             }
             
-            #mobile-loading.hidden {
-                opacity: 0;
-                pointer-events: none;
-            }
-            
-            #mobile-loading .loading-spinner {
-                width: 50px;
-                height: 50px;
-                border: 3px solid rgba(255, 255, 255, 0.3);
-                border-radius: 50%;
-                border-top-color: white;
-                animation: spin 1s linear infinite;
-                margin-bottom: 20px;
-            }
-            
-            #mobile-loading .loading-text {
-                color: white;
-                font-family: 'Inconsolata', monospace;
-                font-size: 16px;
-            }
-            
-            @keyframes spin {
-                to { transform: rotate(360deg); }
-            }
-            
-            #mobile-direct-view h2 {
-                font-size: 24px;
-                margin-bottom: 20px;
+            #loading-container {
                 text-align: center;
+                padding: 20px;
+                max-width: 90%;
             }
             
-            #mobile-direct-view .mobile-about {
-                font-size: 16px;
-                line-height: 1.5;
-                margin-bottom: 30px;
-            }
-            
-            #mobile-direct-view .mobile-warning {
-                border: 1px solid white;
-                padding: 15px;
-                border-radius: 5px;
+            #loading-text {
                 margin-top: 20px;
+                font-size: 16px;
             }
             
-            #mobile-direct-view .mobile-note {
-                color: #4CAF50;
-                font-style: italic;
-                margin-top: 10px;
-            }
-            
-            #mobile-direct-view .theme-toggle {
-                text-align: center;
-                margin-top: 30px;
-            }
-            
-            #mobile-direct-view .theme-toggle button {
-                background-color: #333;
-                color: white;
-                border: 1px solid #555;
-                padding: 10px 20px;
-                border-radius: 5px;
-                font-family: 'Inconsolata', monospace;
-                cursor: pointer;
-            }
-            
-            body.light-theme #mobile-direct-view .theme-toggle button {
-                background-color: #ddd;
-                color: black;
-                border: 1px solid #ccc;
-            }
-            
-            #mobile-direct-view .theme-toggle button:hover {
-                opacity: 0.8;
-            }
-            
-            /* Hide the main terminal on mobile */
-            #terminal {
+            /* Hide mobile-specific elements */
+            #mobile-direct-view {
                 display: none !important;
             }
         }
@@ -163,157 +93,41 @@
     </style>
 </head>
 <body class="dark-theme">
-    <!-- Mobile-specific view that loads immediately without JavaScript -->
-    <div id="mobile-direct-view">
-        <!-- Mobile loading screen -->
-        <div id="mobile-loading">
-            <div class="loading-spinner"></div>
-            <div class="loading-text">Loading SIMPLETS v.0.6...</div>
+    <!-- Mobile warning message (hidden by default) -->
+    <div id="mobile-view">
+        <div class="mobile-warning">
+            <p>This terminal interface is optimized for desktop viewing.</p>
+            <p class="mobile-note">For best experience, please use a desktop device.</p>
         </div>
-        
-        <!-- Left animation box -->
-        <div class="mobile-animation-box left"></div>
-        
-        <!-- Content -->
-        <div class="mobile-content">
-            <h2>SIMPLETS Terminal</h2>
-            <div class="mobile-about">
-                SIMPLETS is a minimalist terminal interface designed for exploring projects and ideas. It provides a clean, distraction-free environment for interacting with content through a command-line interface.
-            </div>
-            <div class="mobile-warning">
-                <p>This terminal interface is optimized for desktop viewing.</p>
-                <p class="mobile-note">Please open on a desktop device for full functionality.</p>
-            </div>
-            <div class="theme-toggle">
-                <button onclick="toggleMobileTheme()">Toggle Theme</button>
-            </div>
-        </div>
-        
-        <!-- Right animation box -->
-        <div class="mobile-animation-box right"></div>
     </div>
     
     <script>
-        // Simple theme toggle for mobile that works without the main script
-        function toggleMobileTheme() {
-            document.body.classList.toggle('light-theme');
-            
-            // Update mobile view colors based on theme
-            const mobileView = document.getElementById('mobile-direct-view');
-            if (document.body.classList.contains('light-theme')) {
-                mobileView.style.backgroundColor = 'white';
-                mobileView.style.color = 'black';
-                
-                // Update animation characters for light theme
-                document.querySelectorAll('.mobile-animation-box .char').forEach(char => {
-                    char.style.color = 'black';
-                });
-            } else {
-                mobileView.style.backgroundColor = 'black';
-                mobileView.style.color = 'white';
-                
-                // Update animation characters for dark theme
-                document.querySelectorAll('.mobile-animation-box .char').forEach(char => {
-                    char.style.color = 'white';
-                });
-            }
-        }
-        
-        // Create the mobile animations
-        function createMobileAnimations() {
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!?=*#$';
-            const leftBox = document.querySelector('.mobile-animation-box.left');
-            const rightBox = document.querySelector('.mobile-animation-box.right');
-            
-            // Clear any existing content
-            leftBox.innerHTML = '';
-            rightBox.innerHTML = '';
-            
-            // Create characters for left box
-            for (let i = 0; i < 20; i++) {
-                const char = document.createElement('div');
-                char.className = 'char';
-                char.textContent = chars[Math.floor(Math.random() * chars.length)];
-                char.style.left = '5px';
-                char.style.top = (i * 5) + '%';
-                char.style.opacity = Math.random() * 0.7 + 0.3;
-                leftBox.appendChild(char);
-            }
-            
-            // Create characters for right box
-            for (let i = 0; i < 20; i++) {
-                const char = document.createElement('div');
-                char.className = 'char';
-                char.textContent = chars[Math.floor(Math.random() * chars.length)];
-                char.style.left = '5px';
-                char.style.top = (i * 5) + '%';
-                char.style.opacity = Math.random() * 0.7 + 0.3;
-                rightBox.appendChild(char);
-            }
-            
-            // Animate the characters
-            animateChars();
-        }
-        
-        // Animate the characters
-        function animateChars() {
-            const chars = document.querySelectorAll('.mobile-animation-box .char');
-            
-            chars.forEach(char => {
-                // Randomly change characters
-                if (Math.random() < 0.1) {
-                    const allChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!?=*#$';
-                    char.textContent = allChars[Math.floor(Math.random() * allChars.length)];
+        // Handle mobile view adjustments
+        function handleMobileView() {
+            if (window.innerWidth <= 768) {
+                // Adjust terminal input for mobile
+                const terminalInput = document.getElementById('terminal-input');
+                if (terminalInput) {
+                    terminalInput.focus();
+                    terminalInput.setAttribute('autocorrect', 'off');
+                    terminalInput.setAttribute('autocapitalize', 'off');
+                    terminalInput.setAttribute('spellcheck', 'false');
                 }
                 
-                // Randomly change opacity
-                if (Math.random() < 0.1) {
-                    char.style.opacity = Math.random() * 0.7 + 0.3;
-                }
-            });
-            
-            // Continue animation
-            setTimeout(animateChars, 500);
+                // Ensure the terminal takes full viewport height
+                document.documentElement.style.height = '100%';
+                document.body.style.height = '100%';
+                document.getElementById('terminal').style.height = '100vh';
+            }
         }
         
-        // Handle mobile loading and initialization
+        // Initial mobile view setup
         if (window.innerWidth <= 768) {
-            const mobileView = document.getElementById('mobile-direct-view');
-            const mobileLoading = document.getElementById('mobile-loading');
-            
-            if (mobileView) {
-                mobileView.style.backgroundColor = 'black';
-                mobileView.style.color = 'white';
-                
-                // Simulate loading process
-                const loadingTexts = [
-                    'Initializing SIMPLETS kernel...',
-                    'Loading system modules...',
-                    'Configuring network interfaces...',
-                    'Mounting filesystems...',
-                    'Authenticating system...',
-                    'Preparing terminal environment...'
-                ];
-                
-                let textIndex = 0;
-                const loadingTextElement = document.querySelector('#mobile-loading .loading-text');
-                
-                // Update loading text
-                const loadingInterval = setInterval(() => {
-                    loadingTextElement.textContent = loadingTexts[textIndex];
-                    textIndex = (textIndex + 1) % loadingTexts.length;
-                }, 800);
-                
-                // Hide loading screen after delay
-                setTimeout(() => {
-                    mobileLoading.classList.add('hidden');
-                    clearInterval(loadingInterval);
-                    
-                    // Create animations after loading
-                    setTimeout(createMobileAnimations, 100);
-                }, 3000);
-            }
+            handleMobileView();
         }
+        
+        // Handle window resize
+        window.addEventListener('resize', handleMobileView);
     </script>
     <div id="terminal">
         <div id="loading-screen">
@@ -323,15 +137,8 @@
             </div>
         </div>
         <div id="terminal-output">
-        <div id="mobile-view">
-            <h2>SIMPLETS Terminal</h2>
-            <div id="about-info"></div>
-            <div class="mobile-warning">
-                <p>This terminal interface is optimized for desktop viewing.</p>
-                <p class="mobile-note">Please open on a desktop device for full functionality.</p>
-            </div>
+            <!-- Content will be populated by script.js -->
         </div>
-    </div>
         <div id="terminal-input-area">
             <span class="prompt">$</span>
             <input type="text" id="terminal-input" autocomplete="off">
