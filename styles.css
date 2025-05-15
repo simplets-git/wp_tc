@@ -452,44 +452,37 @@ body::-webkit-scrollbar,
     color: var(--text-color, #fff) !important;
   }
   
-  /* Animation boxes on mobile - 2 columns */
-  .terminal-side-box {
-    width: 18px !important;
-    height: 18px !important;
-    margin: 2px !important;
-    background-color: transparent !important;
-  }
-  
-  .terminal-side-animation {
-    width: 100% !important;
-    height: 100% !important;
-  }
-  
-  .terminal-side-container {
+  /* Mobile animation boxes - simple and reliable */
+  .mobile-side-container {
     position: fixed !important;
     top: 0 !important;
     height: 100% !important;
     width: 40px !important;
-    display: grid !important;
-    grid-template-columns: repeat(2, 1fr) !important;
-    align-content: center !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-around !important;
     z-index: 1500 !important;
     pointer-events: none !important;
-    opacity: 0.8 !important;
   }
   
-  .terminal-side-container.left {
+  .mobile-side-container.left {
     left: 0 !important;
   }
   
-  .terminal-side-container.right {
+  .mobile-side-container.right {
     right: 0 !important;
   }
   
-  /* Make animation boxes more visible on mobile */
-  .terminal-side-box text {
-    fill: var(--text-color, #fff) !important;
-    font-size: 14px !important;
+  .mobile-animation-box {
+    width: 15px !important;
+    height: 15px !important;
+    margin: 2px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    color: var(--text-color, #fff) !important;
+    font-size: 12px !important;
+    font-weight: bold !important;
   }
   
   /* Hide terminal elements */

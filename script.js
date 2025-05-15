@@ -1305,6 +1305,76 @@ function setupTerminalInterface() {
     }, 500);
 }
 
+// Simple function to create animation boxes specifically for mobile
+function createMobileAnimationBoxes() {
+    // Clear any existing animation boxes
+    const existingContainers = document.querySelectorAll('.mobile-side-container');
+    existingContainers.forEach(container => container.remove());
+    
+    // Create left and right containers
+    ['left', 'right'].forEach(side => {
+        // Create container
+        const container = document.createElement('div');
+        container.className = `mobile-side-container ${side}`;
+        container.style.position = 'fixed';
+        container.style.top = '0';
+        container.style[side] = '0';
+        container.style.height = '100%';
+        container.style.width = '40px';
+        container.style.display = 'flex';
+        container.style.flexDirection = 'column';
+        container.style.justifyContent = 'space-around';
+        container.style.zIndex = '1500';
+        container.style.pointerEvents = 'none';
+        
+        // Create exactly 2 columns of boxes
+        for (let i = 0; i < 20; i++) { // Create 20 boxes vertically
+            const row = document.createElement('div');
+            row.style.display = 'flex';
+            row.style.justifyContent = 'space-around';
+            row.style.width = '100%';
+            
+            // Create 2 boxes per row
+            for (let j = 0; j < 2; j++) {
+                const box = document.createElement('div');
+                box.className = 'mobile-animation-box';
+                box.style.width = '15px';
+                box.style.height = '15px';
+                box.style.margin = '2px';
+                box.style.display = 'flex';
+                box.style.alignItems = 'center';
+                box.style.justifyContent = 'center';
+                box.style.color = 'var(--text-color, #fff)';
+                box.style.opacity = Math.random() * 0.5 + 0.3; // Random opacity between 0.3 and 0.8
+                
+                // Random character
+                const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!?=*#$';
+                box.textContent = chars[Math.floor(Math.random() * chars.length)];
+                
+                row.appendChild(box);
+            }
+            
+            container.appendChild(row);
+        }
+        
+        document.body.appendChild(container);
+    });
+    
+    // Add animation to make characters change
+    setInterval(() => {
+        const boxes = document.querySelectorAll('.mobile-animation-box');
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!?=*#$';
+        
+        // Randomly change some characters
+        boxes.forEach(box => {
+            if (Math.random() < 0.05) { // 5% chance to change
+                box.textContent = chars[Math.floor(Math.random() * chars.length)];
+                box.style.opacity = Math.random() * 0.5 + 0.3;
+            }
+        });
+    }, 500);
+}
+
 const transitionToTerminalOrMobile = () => {
     clearInterval(loadingInterval);
     loadingScreen.classList.add('fade-out');
@@ -1363,8 +1433,8 @@ const transitionToTerminalOrMobile = () => {
                 mobileMsg.style.display = 'flex';
             }
             
-            // Always create animation boxes for mobile
-            WaveAnimation.create(document.body, true);
+            // Create a simpler, guaranteed-to-work animation for mobile
+            createMobileAnimationBoxes();
         } else {
             setupTerminalInterface();
         }
