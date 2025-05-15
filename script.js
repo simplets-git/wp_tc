@@ -202,7 +202,7 @@ const WaveAnimation = {
             svgContainer.appendChild(svg);
 
             const numRows = Math.max(40, Math.ceil(window.innerHeight / 25));
-            const numCols = isMobile ? 1 : 12; // Only 1 column on mobile
+            const numCols = isMobile ? 2 : 12; // 2 columns on mobile
             const cellWidth = 25; // Keep standard cell width for all devices
             const cellHeight = 25; // Keep standard cell height for all devices
 
@@ -225,18 +225,10 @@ const WaveAnimation = {
                     text.setAttribute('x', `${x * cellWidth}`);
                     text.setAttribute('y', `${y * cellHeight}`);
                     text.setAttribute('font-family', 'Share Tech Mono');
-                    // Much larger font size for mobile
-                    if (isMobile) {
-                        text.setAttribute('font-size', '36');
-                        text.setAttribute('fill', 'white');
-                        text.setAttribute('font-weight', 'bold');
-                        // Force the text to be visible and properly sized
-                        text.style.fontSize = '36px';
-                        text.style.fontWeight = 'bold';
-                    } else {
-                        text.setAttribute('font-size', '18');
-                        text.setAttribute('fill', 'white');
-                    }
+                    // Use consistent font size for both mobile and desktop
+                    text.setAttribute('font-size', '18');
+                    text.setAttribute('fill', 'white');
+                    text.style.fontSize = '18px';
                     
                     // Initialize with random character or space
                     const isSpace = Math.random() > 0.6; // 40% chance of character initially
