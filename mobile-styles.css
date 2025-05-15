@@ -46,7 +46,7 @@
 /* Show mobile view on small screens */
 @media (max-width: 768px) {
     .mobile-view {
-        display: none;
+        visibility: hidden;
         position: fixed;
         top: 0;
         left: 0;
@@ -55,6 +55,8 @@
         background-color: var(--bg-color);
         color: var(--text-color);
         z-index: 1000;
+        opacity: 0;
+        transition: opacity 0.5s ease;
     }
     
     #terminal {
@@ -71,10 +73,18 @@
         height: 100%;
         z-index: 2000;
         background-color: black;
+        pointer-events: auto;
     }
     
     /* Ensure loading screen is visible */
     #loading-screen.fade-out {
         display: flex;
+        pointer-events: none;
+    }
+    
+    /* Show mobile view after loading */
+    .mobile-view.visible {
+        visibility: visible;
+        opacity: 1;
     }
 }

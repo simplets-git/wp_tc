@@ -1205,7 +1205,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Show mobile view after fade-out animation
             setTimeout(() => {
                 if (mobileView) {
-                    mobileView.style.display = 'flex';
+                    mobileView.classList.add('visible');
                     document.body.classList.remove('loading');
                 }
             }, 1000);
