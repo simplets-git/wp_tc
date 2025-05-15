@@ -11,6 +11,14 @@
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
 </head>
 <body class="dark-theme">
+    <!-- Loading Screen (outside terminal for mobile compatibility) -->
+    <div id="loading-screen">
+        <div id="loading-container">
+            <pre id="ascii-art"></pre>
+            <div id="loading-text">Loading SIMPLETS v.0.6...</div>
+        </div>
+    </div>
+    
     <!-- Mobile View -->
     <div class="mobile-view">
         <div class="mobile-logo" id="mobile-logo">□_□</div>
@@ -27,12 +35,6 @@
     </div>
     
     <div id="terminal">
-        <div id="loading-screen">
-            <div id="loading-container">
-                <pre id="ascii-art"></pre>
-                <div id="loading-text">Loading SIMPLETS v.0.6...</div>
-            </div>
-        </div>
         <div id="terminal-output"></div>
         <div id="terminal-input-area">
             <span class="prompt">$</span>

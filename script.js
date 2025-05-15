@@ -1195,24 +1195,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
     animateLoadingScreen();
 
-    // For desktop only, proceed with terminal initialization after delay
-    if (window.innerWidth > 768) {
+    // Run loading animation for both desktop and mobile
+    setTimeout(() => {
+        clearInterval(loadingInterval);
+        loadingScreen.classList.add('fade-out');
+        
         setTimeout(() => {
-            clearInterval(loadingInterval);
-            loadingScreen.classList.add('fade-out');
-            setTimeout(() => {
+            if (window.innerWidth > 768) {
+                // For desktop, set up terminal interface
                 setupTerminalInterface();
-                document.body.classList.remove('loading');
-            }, 1000);
-        }, 4000);
-    } else {
-        // For mobile, just hide the loading screen after animation
-        setTimeout(() => {
-            clearInterval(loadingInterval);
-            loadingScreen.style.display = 'none';
+            } else {
+                // For mobile, just hide the loading screen
+                loadingScreen.style.display = 'none';
+            }
+            // Remove loading class to show appropriate view
             document.body.classList.remove('loading');
-        }, 4000);
-    }
+        }, 1000);
+    }, 4000);
 
 // Helper function for terminal logo click
 function handleTerminalLogoClick() {
