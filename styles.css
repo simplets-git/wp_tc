@@ -445,6 +445,10 @@ body::-webkit-scrollbar,
 /* Logo Styling */
 
 @media (max-width: 768px) {
+  body, html {
+    overflow-y: auto !important;
+    height: auto !important;
+  }
   .terminal-side-box {
     width: 18px !important;
     height: 18px !important;
@@ -455,13 +459,17 @@ body::-webkit-scrollbar,
     display: none !important;
   }
   #mobile-message {
-    display: block;
+    position: fixed !important;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    z-index: 2000;
+    background: var(--bg-color, #fff);
+    color: var(--text-color, #111);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
     padding: 32px 16px;
     font-size: 1.1em;
-    color: var(--text-color, #111);
-    background: var(--bg-color, #fff);
-    text-align: center;
-    min-height: 100vh;
   }
 }
 

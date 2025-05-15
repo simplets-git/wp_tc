@@ -1266,7 +1266,8 @@ const transitionToTerminalOrMobile = () => {
     setTimeout(() => {
         loadingScreen.style.display = 'none';
         if (isMobile()) {
-            document.getElementById('terminal').style.display = 'none';
+            const terminal = document.getElementById('terminal');
+            if (terminal) terminal.style.display = 'none';
             let mobileMsg = document.getElementById('mobile-message');
             if (!mobileMsg) {
                 mobileMsg = document.createElement('div');
@@ -1279,9 +1280,24 @@ const transitionToTerminalOrMobile = () => {
                     Built by codes, from character to character.<br><br>
                     <em>For the full CLI experience, please open this site on a desktop device.</em>
                 `;
+                // Robust inline style for mobile message
+                mobileMsg.style.position = 'fixed';
+                mobileMsg.style.top = '0';
+                mobileMsg.style.left = '0';
+                mobileMsg.style.width = '100vw';
+                mobileMsg.style.height = '100vh';
+                mobileMsg.style.zIndex = '2000';
+                mobileMsg.style.background = 'var(--bg-color, #fff)';
+                mobileMsg.style.color = 'var(--text-color, #111)';
+                mobileMsg.style.display = 'flex';
+                mobileMsg.style.alignItems = 'center';
+                mobileMsg.style.justifyContent = 'center';
+                mobileMsg.style.textAlign = 'center';
+                mobileMsg.style.padding = '32px 16px';
+                mobileMsg.style.fontSize = '1.1em';
                 document.body.appendChild(mobileMsg);
             } else {
-                mobileMsg.style.display = 'block';
+                mobileMsg.style.display = 'flex';
             }
         } else {
             setupTerminalInterface();
