@@ -3,132 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SIMPLETS Terminal v.0.6</title>
+    <title>SIMPLETS Terminal v.0.7</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="menu-styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inconsolata:wght@400;700&display=swap" rel="stylesheet">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
-    
-    <style>
-        /* Responsive styles for terminal */
-        @media (max-width: 768px) {
-            #terminal {
-                width: 100%;
-                height: 100vh;
-                border-radius: 0;
-                margin: 0;
-                max-width: 100%;
-                max-height: 100%;
-            }
-            
-            #terminal-output {
-                padding: 10px;
-                font-size: 14px;
-                line-height: 1.4;
-                max-height: calc(100vh - 60px);
-                overflow-y: auto;
-                -webkit-overflow-scrolling: touch;
-            }
-            
-            #terminal-input-area {
-                padding: 10px;
-                position: fixed;
-                bottom: 0;
-                left: 0;
-                right: 0;
-                background-color: var(--bg-color);
-                border-top: 1px solid var(--border-color);
-                display: flex;
-                align-items: center;
-            }
-            
-            #terminal-input {
-                flex: 1;
-                margin-left: 5px;
-                font-size: 16px;
-                height: 30px;
-            }
-            
-            /* Hide mobile view warning since we're using the main terminal */
-            #mobile-view {
-                display: none !important;
-            }
-            
-            /* Adjust loading screen for mobile */
-            #loading-screen {
-                position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                background-color: var(--bg-color);
-                z-index: 1000;
-            }
-            
-            #loading-container {
-                text-align: center;
-                padding: 20px;
-                max-width: 90%;
-            }
-            
-            #loading-text {
-                margin-top: 20px;
-                font-size: 16px;
-            }
-            
-            /* Hide mobile-specific elements */
-            #mobile-direct-view {
-                display: none !important;
-            }
-        }
-        
-        @media (min-width: 769px) {
-            #mobile-direct-view {
-                display: none !important;
-            }
-        }
-    </style>
 </head>
 <body class="dark-theme">
-    <!-- Mobile warning message (hidden by default) -->
-    <div id="mobile-view">
-        <div class="mobile-warning">
-            <p>This terminal interface is optimized for desktop viewing.</p>
-            <p class="mobile-note">For best experience, please use a desktop device.</p>
-        </div>
-    </div>
-    
-    <script>
-        // Handle mobile view adjustments
-        function handleMobileView() {
-            if (window.innerWidth <= 768) {
-                // Adjust terminal input for mobile
-                const terminalInput = document.getElementById('terminal-input');
-                if (terminalInput) {
-                    terminalInput.focus();
-                    terminalInput.setAttribute('autocorrect', 'off');
-                    terminalInput.setAttribute('autocapitalize', 'off');
-                    terminalInput.setAttribute('spellcheck', 'false');
-                }
-                
-                // Ensure the terminal takes full viewport height
-                document.documentElement.style.height = '100%';
-                document.body.style.height = '100%';
-                document.getElementById('terminal').style.height = '100vh';
-            }
-        }
-        
-        // Initial mobile view setup
-        if (window.innerWidth <= 768) {
-            handleMobileView();
-        }
-        
-        // Handle window resize
-        window.addEventListener('resize', handleMobileView);
-    </script>
     <div id="terminal">
         <div id="loading-screen">
             <div id="loading-container">
@@ -137,8 +18,15 @@
             </div>
         </div>
         <div id="terminal-output">
-            <!-- Content will be populated by script.js -->
+        <div id="mobile-view" style="display: none;">
+            <h2>SIMPLETS Terminal</h2>
+            <div id="about-info"></div>
+            <div class="mobile-warning">
+                <p>This terminal interface is optimized for desktop viewing.</p>
+                <p class="mobile-note">Please open on a desktop device for full functionality.</p>
+            </div>
         </div>
+    </div>
         <div id="terminal-input-area">
             <span class="prompt">$</span>
             <input type="text" id="terminal-input" autocomplete="off">
