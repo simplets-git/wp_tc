@@ -1273,11 +1273,31 @@ function setupTerminalInterface() {
 const transitionToTerminal = () => {
     clearInterval(loadingInterval);
     loadingScreen.classList.add('fade-out');
+    
+    // For mobile devices, wait for fade-out animation to complete
+    const isMobile = window.innerWidth <= 768;
+    const transitionDuration = isMobile ? 1500 : 1000;
+    
     setTimeout(() => {
-        setupTerminalInterface();
+        if (isMobile) {
+            // Show mobile view after loading animation
+            const mobileView = document.querySelector('.mobile-view');
+            if (mobileView) {
+                mobileView.style.opacity = '0';
+                mobileView.style.transform = 'scale(0.95)';
+                mobileView.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                
+                setTimeout(() => {
+                    mobileView.style.opacity = '1';
+                    mobileView.style.transform = 'scale(1)';
+                }, 100);
+            }
+        } else {
+            setupTerminalInterface();
+        }
         // Remove loading class from body
         document.body.classList.remove('loading');
-    }, 1000);
+    }, transitionDuration);
 };
 
     setTimeout(transitionToTerminal, 4000);
