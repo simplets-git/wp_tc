@@ -8,8 +8,129 @@
     <link rel="stylesheet" href="menu-styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inconsolata:wght@400;700&display=swap" rel="stylesheet">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    
+    <!-- Mobile-specific style that will load immediately -->
+    <style>
+        @media (max-width: 768px) {
+            #mobile-direct-view {
+                display: block !important;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: black;
+                color: white;
+                z-index: 9999;
+                padding: 20px;
+                box-sizing: border-box;
+                font-family: 'Inconsolata', monospace;
+            }
+            
+            #mobile-direct-view h2 {
+                font-size: 24px;
+                margin-bottom: 20px;
+                text-align: center;
+            }
+            
+            #mobile-direct-view .mobile-about {
+                font-size: 16px;
+                line-height: 1.5;
+                margin-bottom: 30px;
+            }
+            
+            #mobile-direct-view .mobile-warning {
+                border: 1px solid white;
+                padding: 15px;
+                border-radius: 5px;
+                margin-top: 20px;
+            }
+            
+            #mobile-direct-view .mobile-note {
+                color: #4CAF50;
+                font-style: italic;
+                margin-top: 10px;
+            }
+            
+            #mobile-direct-view .theme-toggle {
+                text-align: center;
+                margin-top: 30px;
+            }
+            
+            #mobile-direct-view .theme-toggle button {
+                background-color: #333;
+                color: white;
+                border: 1px solid #555;
+                padding: 10px 20px;
+                border-radius: 5px;
+                font-family: 'Inconsolata', monospace;
+                cursor: pointer;
+            }
+            
+            body.light-theme #mobile-direct-view .theme-toggle button {
+                background-color: #ddd;
+                color: black;
+                border: 1px solid #ccc;
+            }
+            
+            #mobile-direct-view .theme-toggle button:hover {
+                opacity: 0.8;
+            }
+            
+            /* Hide the main terminal on mobile */
+            #terminal {
+                display: none !important;
+            }
+        }
+        
+        @media (min-width: 769px) {
+            #mobile-direct-view {
+                display: none !important;
+            }
+        }
+    </style>
 </head>
 <body class="dark-theme">
+    <!-- Mobile-specific view that loads immediately without JavaScript -->
+    <div id="mobile-direct-view">
+        <h2>SIMPLETS Terminal</h2>
+        <div class="mobile-about">
+            SIMPLETS is a minimalist terminal interface designed for exploring projects and ideas. It provides a clean, distraction-free environment for interacting with content through a command-line interface.
+        </div>
+        <div class="mobile-warning">
+            <p>This terminal interface is optimized for desktop viewing.</p>
+            <p class="mobile-note">Please open on a desktop device for full functionality.</p>
+        </div>
+        <div class="theme-toggle">
+            <button onclick="toggleMobileTheme()">Toggle Theme</button>
+        </div>
+    </div>
+    
+    <script>
+        // Simple theme toggle for mobile that works without the main script
+        function toggleMobileTheme() {
+            document.body.classList.toggle('light-theme');
+            
+            // Update mobile view colors based on theme
+            const mobileView = document.getElementById('mobile-direct-view');
+            if (document.body.classList.contains('light-theme')) {
+                mobileView.style.backgroundColor = 'white';
+                mobileView.style.color = 'black';
+            } else {
+                mobileView.style.backgroundColor = 'black';
+                mobileView.style.color = 'white';
+            }
+        }
+        
+        // Check if mobile and initialize theme
+        if (window.innerWidth <= 768) {
+            const mobileView = document.getElementById('mobile-direct-view');
+            if (mobileView) {
+                mobileView.style.backgroundColor = 'black';
+                mobileView.style.color = 'white';
+            }
+        }
+    </script>
     <div id="terminal">
         <div id="loading-screen">
             <div id="loading-container">
