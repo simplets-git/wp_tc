@@ -122,17 +122,13 @@ body::-webkit-scrollbar,
     }
     
     #mobile-view {
-        display: block !important;
+        display: none;
         width: 100%;
         max-width: 100%;
         padding: 20px;
         box-sizing: border-box;
         margin: 0 auto;
         text-align: left;
-        background-color: var(--bg-color);
-        color: var(--text-color);
-        z-index: 100;
-        position: relative;
     }
     
     #about-info {
@@ -142,7 +138,6 @@ body::-webkit-scrollbar,
         font-size: 16px;
         line-height: 1.5;
         margin-bottom: 20px;
-        display: block !important;
     }
 }
 
@@ -661,7 +656,7 @@ svg text {
     }
     
     .terminal-side-animation text {
-        font-size: 18px !important;
+        font-size: 36px !important;
         font-weight: bold !important;
         fill: white !important;
         transform: scale(1) !important;
