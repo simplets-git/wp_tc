@@ -1163,62 +1163,83 @@ document.addEventListener('DOMContentLoaded', () => {
     const checkMobileView = () => {
         const isMobile = window.innerWidth <= 768;
         const mobileView = document.getElementById('mobile-view');
-        const terminalOutput = document.getElementById('terminal-output');
-        const terminalInputArea = document.getElementById('terminal-input-area');
         
-        // Function to completely hide and disable CLI on mobile
+        // Function to safely hide CLI elements on mobile
         const disableCLI = () => {
-            // First, empty the terminal output except for the mobile view
-            const children = Array.from(terminalOutput.children);
-            children.forEach(child => {
-                // Keep only the mobile view element
-                if (child.id !== 'mobile-view') {
-                    child.style.display = 'none';
-                    child.style.visibility = 'hidden';
+            try {
+                // Get necessary elements
+                const terminalOutput = document.getElementById('terminal-output');
+                const terminalInputArea = document.getElementById('terminal-input-area');
+                
+                // Make sure mobile view is visible
+                if (mobileView) {
+                    mobileView.style.display = 'block';
+                    mobileView.style.visibility = 'visible';
                 }
-            });
-            
-            // Hide all CLI elements
-            document.querySelectorAll('.welcome-message, .prompt-line, .command-output, .message, .cursor-indicator, .command-line').forEach(el => {
-                if (el) {
-                    el.style.display = 'none';
-                    el.style.visibility = 'hidden';
+                
+                // Hide CLI elements but keep the structure intact
+                document.querySelectorAll('.welcome-message, .prompt-line, .command-output, .message, .cursor-indicator, .command-line').forEach(el => {
+                    if (el && el.parentNode) {
+                        el.style.display = 'none';
+                    }
+                });
+                
+                // Hide terminal input but don't remove it
+                if (terminalInputArea) {
+                    terminalInputArea.style.display = 'none';
                 }
-            });
-            
-            // Completely disable terminal input
-            if (terminalInputArea) {
-                terminalInputArea.style.display = 'none';
-                terminalInputArea.style.visibility = 'hidden';
-            }
-            
-            // Hide the version display on mobile
-            const versionDisplay = document.getElementById('version-display');
-            if (versionDisplay) {
-                versionDisplay.style.display = 'none';
+                
+                // Hide the version display on mobile
+                const versionDisplay = document.getElementById('version-display');
+                if (versionDisplay) {
+                    versionDisplay.style.display = 'none';
+                }
+                
+                // Make sure the terminal output container is still visible
+                if (terminalOutput) {
+                    terminalOutput.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error in disableCLI:', error);
             }
         };
         
         if (isMobile) {
-            // Setup mobile view
-            const aboutInfo = document.getElementById('about-info');
-            aboutInfo.innerHTML = getTranslation('commands.about');
-            mobileView.style.display = 'block';
-            
-            // Adjust terminal for mobile
-            document.body.classList.add('mobile-device');
-            
-            // Ensure animations are properly sized
-            const sideBoxes = document.querySelectorAll('.terminal-side-box');
-            sideBoxes.forEach(box => {
-                box.style.width = '30px';
-            });
-            
-            // Completely disable CLI
-            disableCLI();
-            
-            // Completely replace the theme toggle function on mobile
-            window.originalToggleTheme = window.toggleTheme;
+            try {
+                // Setup mobile view
+                const aboutInfo = document.getElementById('about-info');
+                if (aboutInfo) {
+                    aboutInfo.innerHTML = getTranslation('commands.about');
+                }
+                
+                // Ensure mobile view is visible
+                if (mobileView) {
+                    mobileView.style.display = 'block';
+                }
+                
+                // Adjust terminal for mobile
+                document.body.classList.add('mobile-device');
+                
+                // Ensure animations are properly sized
+                const sideBoxes = document.querySelectorAll('.terminal-side-box');
+                sideBoxes.forEach(box => {
+                    box.style.width = '30px';
+                });
+                
+                // Make sure terminal output is visible
+                const terminalOutput = document.getElementById('terminal-output');
+                if (terminalOutput) {
+                    terminalOutput.style.display = 'block';
+                }
+                
+                // Safely disable CLI elements
+                setTimeout(disableCLI, 100);
+                
+                // Completely replace the theme toggle function on mobile
+                window.originalToggleTheme = window.toggleTheme;
+            } catch (error) {
+                console.error('Error in mobile setup:', error);
+            }
             
             // Create a new direct theme toggle that doesn't use the CLI
             window.toggleTheme = function() {
