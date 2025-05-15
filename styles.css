@@ -398,12 +398,12 @@ body::-webkit-scrollbar,
     letter-spacing: 0.5px;
     line-height: 1.1;
     font-size: 1em;
-    transition: color 0.2s, border-bottom-color 0.2s;
+    
 }
 
 .light-theme .terminal-command {
-    color: var(--command-text-color);
-    border-bottom: 2px solid var(--command-text-color);
+    color: var(--text-color);
+    border-bottom: 2px solid var(--text-color);
 }
 
 

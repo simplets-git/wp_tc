@@ -18,8 +18,11 @@ const translations = {
         // Command responses
         commands: {
             about: `
-<strong>SIMPLETS: Redefining Terminal Experience</strong><br>
-SIMPLETS is an innovative terminal interface that blends cutting-edge technology with a minimalist, immersive design. Our mission is to transform how developers and tech enthusiasts interact with their digital environment.
+<strong>SIMPLETS is the cult of digital awakening:</strong><br>
+An underground and experimental DeSoc journey.<br>
+Designed around free speech and pseudonym friendly values.<br>
+A convergence where A.I. and creative souls unite.<br>
+Built by codes, from character to character.
             `,
             manifesto: `
 <strong>SIMPLETS Manifesto</strong><br>

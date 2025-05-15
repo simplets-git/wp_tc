@@ -401,11 +401,11 @@ const CONFIG = {
     username: 'anonymous',
     hostname: 'simplets',
     availableCommands: [
-        'help', 'clear', 'video', 'stop',
-        'about', 'manifesto', 'project', 'minting',
-        'roadmap', 'team', 'links', 'legal', 'language', 'cursor', 'set'
+        'about', 'project', 'minting', 'roadmap',
+        'team', 'manifesto', 'links', 'legal',
+        'video', 'stop', 'language', 'cursor'
     ],
-    cursorStyle: 'block' // Default cursor style
+    cursorStyle: 'underscore' // Default cursor style
 };
 
 // =====================
@@ -1137,6 +1137,13 @@ const TerminalInput = {
 // Main Initialization
 // =====================
 document.addEventListener('DOMContentLoaded', () => {
+    const isMobile = window.innerWidth <= 768;
+    if (isMobile) {
+        const mobileView = document.getElementById('mobile-view');
+        const aboutInfo = document.getElementById('about-info');
+        aboutInfo.innerHTML = getTranslation('commands.about');
+        mobileView.style.display = 'block';
+    }
     const asciiArt = `
  _______ _____ _______  _____         _______ _______ _______
  |______   |   |  |  | |_____] |      |______    |    |______
