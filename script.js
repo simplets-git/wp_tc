@@ -1216,29 +1216,6 @@ function isMobile() {
 
 function setupTerminalInterface() {
     loadingScreen.style.display = 'none';
-
-    // MOBILE: Only show a constant about message and skip welcome/terminal
-    if (isMobile()) {
-        // Hide terminal and show mobile message
-        document.getElementById('terminal').style.display = 'none';
-        let mobileMsg = document.getElementById('mobile-message');
-        if (!mobileMsg) {
-            mobileMsg = document.createElement('div');
-            mobileMsg.id = 'mobile-message';
-            mobileMsg.innerHTML = `
-                <strong>SIMPLETS is the cult of digital awakening:</strong><br>
-                An underground and experimental DeSoc journey.<br>
-                Designed around free speech and pseudonym friendly values.<br>
-                A convergence where A.I. and creative souls unite.<br>
-                Built by codes, from character to character.<br><br>
-                <em>For the full CLI experience, please open this site on a desktop device.</em>
-            `;
-            document.body.appendChild(mobileMsg);
-        } else {
-            mobileMsg.style.display = 'block';
-        }
-        return;
-    }
     // Desktop: show welcome message as usual
     const welcomeMessage = Utils.createElement('div', ['welcome-line']);
     welcomeMessage.innerHTML = getTranslation('welcome');
@@ -1283,14 +1260,37 @@ function setupTerminalInterface() {
     }, 500);
 }
 
-const transitionToTerminal = () => {
+const transitionToTerminalOrMobile = () => {
     clearInterval(loadingInterval);
     loadingScreen.classList.add('fade-out');
-    setTimeout(setupTerminalInterface, 1000);
+    setTimeout(() => {
+        loadingScreen.style.display = 'none';
+        if (isMobile()) {
+            document.getElementById('terminal').style.display = 'none';
+            let mobileMsg = document.getElementById('mobile-message');
+            if (!mobileMsg) {
+                mobileMsg = document.createElement('div');
+                mobileMsg.id = 'mobile-message';
+                mobileMsg.innerHTML = `
+                    <strong>SIMPLETS is the cult of digital awakening:</strong><br>
+                    An underground and experimental DeSoc journey.<br>
+                    Designed around free speech and pseudonym friendly values.<br>
+                    A convergence where A.I. and creative souls unite.<br>
+                    Built by codes, from character to character.<br><br>
+                    <em>For the full CLI experience, please open this site on a desktop device.</em>
+                `;
+                document.body.appendChild(mobileMsg);
+            } else {
+                mobileMsg.style.display = 'block';
+            }
+        } else {
+            setupTerminalInterface();
+        }
+    }, 1000);
 };
 
-    setTimeout(transitionToTerminal, 4000);
+setTimeout(transitionToTerminalOrMobile, 4000);
 
-    const versionDiv = document.getElementById('version-display');
-    if (versionDiv) versionDiv.textContent = `Version: ${CONFIG.version}`;
+const versionDiv = document.getElementById('version-display');
+if (versionDiv) versionDiv.textContent = `Version: ${CONFIG.version}`;
 });
