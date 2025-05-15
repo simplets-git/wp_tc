@@ -3,6 +3,9 @@ console.log('SCRIPT.JS LOADED');
 // Utility Functions
 // =====================
 const Utils = {
+    isMobile() {
+        return window.innerWidth <= 768;
+    },
     focusAndSetCursorAtEnd(element) {
         if (!element) return;
         // Remove all child nodes except text (should only be text)
@@ -222,13 +225,13 @@ const WaveAnimation = {
                     text.setAttribute('x', `${x * cellWidth}`);
                     text.setAttribute('y', `${y * cellHeight}`);
                     text.setAttribute('font-family', 'Share Tech Mono');
-                    // Set font size for mobile and desktop
+                    // Much larger font size for mobile
                     if (isMobile) {
-                        text.setAttribute('font-size', '18');
+                        text.setAttribute('font-size', '36');
                         text.setAttribute('fill', 'white');
                         text.setAttribute('font-weight', 'bold');
                         // Force the text to be visible and properly sized
-                        text.style.fontSize = '18px';
+                        text.style.fontSize = '36px';
                         text.style.fontWeight = 'bold';
                     } else {
                         text.setAttribute('font-size', '18');
@@ -1159,167 +1162,120 @@ const TerminalInput = {
 // Main Initialization
 // =====================
 document.addEventListener('DOMContentLoaded', () => {
-    // Enhanced mobile detection function with more thorough cleanup
-    const checkMobileView = () => {
-        const isMobile = window.innerWidth <= 768;
+    // --- Mobile CLI helpers (moved out for reuse) ---
+    function hideElements(selectors) {
+        selectors.forEach(sel => {
+            document.querySelectorAll(sel).forEach(el => {
+                el.style.display = 'none';
+                el.style.visibility = 'hidden';
+            });
+        });
+    }
+    function showElements(selectors, display = 'flex') {
+        selectors.forEach(sel => {
+            document.querySelectorAll(sel).forEach(el => {
+                el.style.display = display;
+                el.style.visibility = 'visible';
+            });
+        });
+    }
+    function disableCLI() {
+        hideElements(['.welcome-message']);
+        document.querySelectorAll('.message').forEach(el => {
+            if (el && el.textContent && el.textContent.includes('Welcome to the abyss')) {
+                el.style.display = 'none';
+                el.style.visibility = 'hidden';
+            }
+        });
+        hideElements([
+            '.prompt-line',
+            '.command-output',
+            '.command-line',
+            '.cursor-indicator',
+            '.terminal-menu',
+            '.terminal-input-area',
+            '#terminal-input-area',
+        ]);
+    }
+    function enableCLI() {
+        showElements([
+            '.prompt-line',
+            '.command-line',
+            '.cursor-indicator',
+            '.terminal-input-area',
+            '#terminal-input-area',
+        ]);
+        document.querySelectorAll('.command-output, .message, .welcome-message').forEach(el => {
+            el.style.display = 'block';
+            el.style.visibility = 'visible';
+        });
+    }
+    // --- End helpers ---
+
+    // --- MutationObserver for mobile CLI hiding ---
+    let mutationObserver = null;
+    function observeCLIMutations() {
+        if (mutationObserver) mutationObserver.disconnect();
+        mutationObserver = new MutationObserver(() => {
+            if (Utils.isMobile()) disableCLI();
+        });
+        mutationObserver.observe(document.body, { childList: true, subtree: true });
+    }
+    // --- End observer ---
+
+    // --- Theme toggle override for mobile ---
+    window.toggleTheme = function() {
+        const currentTheme = document.body.classList.contains('light-theme') ? 'light' : 'dark';
+        if (currentTheme === 'light') {
+            document.body.classList.remove('light-theme');
+        } else {
+            document.body.classList.add('light-theme');
+        }
+        if (Utils.isMobile()) {
+            disableCLI();
+            let checkCount = 0;
+            const messageCheck = setInterval(() => {
+                disableCLI();
+                checkCount++;
+                if (checkCount > 5) clearInterval(messageCheck);
+            }, 100);
+        }
+        return false;
+    };
+    // --- End theme toggle ---
+
+    // --- Main mobile/desktop view switch ---
+    const setupMobileView = () => {
+        const isMobile = Utils.isMobile();
         const mobileView = document.getElementById('mobile-view');
         const terminalOutput = document.getElementById('terminal-output');
         const terminalInputArea = document.getElementById('terminal-input-area');
-        
-        // Function to completely disable CLI on mobile
-        const disableCLI = () => {
-            // First, find and hide the welcome message specifically
-            const welcomeMessages = document.querySelectorAll('.welcome-message'); 
-            welcomeMessages.forEach(el => {
-                if (el) el.style.display = 'none';
-            });
-            
-            // Find messages containing welcome text
-            document.querySelectorAll('.message').forEach(el => {
-                if (el && el.textContent && el.textContent.includes('Welcome to the abyss')) {
-                    el.style.display = 'none';
-                }
-            });
-            
-            // Hide all CLI elements with !important to force hiding
-            document.querySelectorAll('.prompt-line, .command-output, .message').forEach(el => {
-                if (el) {
-                    el.style.display = 'none';
-                    el.style.visibility = 'hidden';
-                }
-            });
-            
-            // Disable terminal input
-            if (terminalInputArea) {
-                terminalInputArea.style.display = 'none';
-                terminalInputArea.style.visibility = 'hidden';
-            }
-            
-            // Hide any other CLI-related elements
-            document.querySelectorAll('.cursor-indicator, .command-line').forEach(el => {
-                if (el) {
-                    el.style.display = 'none';
-                    el.style.visibility = 'hidden';
-                }
-            });
-        };
-        
         if (isMobile) {
-            // Setup mobile view
-            const aboutInfo = document.getElementById('about-info');
-            aboutInfo.innerHTML = getTranslation('commands.about');
-            mobileView.style.display = 'block';
-            
-            // Adjust terminal for mobile
-            document.body.classList.add('mobile-device');
-            
-            // Ensure animations are properly sized
-            const sideBoxes = document.querySelectorAll('.terminal-side-box');
-            sideBoxes.forEach(box => {
-                box.style.width = '30px';
-            });
-            
-            // Completely disable CLI
+            if (mobileView) mobileView.style.display = 'block';
+            if (terminalOutput) terminalOutput.style.display = 'none';
+            if (terminalInputArea) terminalInputArea.style.display = 'none';
             disableCLI();
-            
-            // Override theme toggle function on mobile to prevent CLI messages
-            window.originalToggleTheme = window.toggleTheme;
-            window.toggleTheme = function() {
-                const currentTheme = document.body.classList.contains('light-theme') ? 'light' : 'dark';
-                
-                if (currentTheme === 'light') {
-                    document.body.classList.remove('light-theme');
-                } else {
-                    document.body.classList.add('light-theme');
-                }
-                
-                // Immediately hide any new messages that might appear
-                disableCLI();
-                
-                // Set up a recurring check to keep hiding messages
-                let checkCount = 0;
-                const messageCheck = setInterval(() => {
-                    disableCLI();
-                    checkCount++;
-                    if (checkCount > 5) clearInterval(messageCheck);
-                }, 100);
-                
-                // Don't add CLI message on mobile
-                return false;
-            };
-            
-            // Disable any other interactive elements
-            document.querySelectorAll('.terminal-command').forEach(el => {
-                el.style.pointerEvents = 'none';
-            });
-            
-            // Add a MutationObserver to keep hiding CLI elements if they get added dynamically
-            if (!window.mobileObserver) {
-                window.mobileObserver = new MutationObserver((mutations) => {
-                    if (document.body.classList.contains('mobile-device')) {
-                        disableCLI();
-                    }
-                });
-                
-                window.mobileObserver.observe(terminalOutput, {
-                    childList: true,
-                    subtree: true
-                });
-            }
+            observeCLIMutations();
         } else {
-            // Reset to desktop view if needed
-            if (mobileView.style.display === 'block') {
-                mobileView.style.display = 'none';
-                document.body.classList.remove('mobile-device');
-                
-                // Restore CLI elements
-                document.querySelectorAll('.prompt-line').forEach(el => {
-                    el.style.display = 'flex';
-                });
-                
-                document.querySelectorAll('.command-line, .cursor-indicator').forEach(el => {
-                    if (el) el.style.display = 'inline-block';
-                });
-                
-                // Show terminal input again
-                if (terminalInputArea) {
-                    terminalInputArea.style.display = 'flex';
-                }
-                
-                // Show CLI messages again
-                document.querySelectorAll('.command-output, .message, .welcome-message').forEach(el => {
-                    el.style.display = 'block';
-                });
-                
-                // Re-enable interactive elements
-                document.querySelectorAll('.terminal-command').forEach(el => {
-                    el.style.pointerEvents = 'auto';
-                });
-                
-                // Restore original theme toggle function
-                if (window.originalToggleTheme) {
-                    window.toggleTheme = window.originalToggleTheme;
-                }
-                
-                // Disconnect the observer if it exists
-                if (window.mobileObserver) {
-                    window.mobileObserver.disconnect();
-                }
-            }
+            if (mobileView) mobileView.style.display = 'none';
+            if (terminalOutput) terminalOutput.style.display = 'block';
+            if (terminalInputArea) terminalInputArea.style.display = 'flex';
+            enableCLI();
+            if (mutationObserver) mutationObserver.disconnect();
         }
     };
     
     // Initial check
-    checkMobileView();
+    setupMobileView();
     
     // Listen for orientation changes and resizes
     window.addEventListener('resize', () => {
-        checkMobileView();
+        setupMobileView();
     });
     
     // Listen for orientation change on mobile devices
     window.addEventListener('orientationchange', () => {
-        setTimeout(checkMobileView, 100);
+        setTimeout(setupMobileView, 100);
     });
     const asciiArt = `
  _______ _____ _______  _____         _______ _______ _______
