@@ -161,34 +161,7 @@ window._projectSVGPairIndices = null;
 // Wave Animation Module
 // =====================
 const WaveAnimation = {
-    // Track if animation has been created
-    initialized: false,
-    
-    // Get number of columns based on screen width
-    getColumnCount() {
-        const width = window.innerWidth;
-        if (width <= 480) return 2;      // Mobile phones
-        if (width <= 768) return 3;      // Small tablets
-        if (width <= 1024) return 6;     // Tablets/small laptops
-        if (width <= 1440) return 8;     // Laptops
-        return 12;                       // Large screens
-    },
-    
-    create(container, isMobileView = false) {
-        // If already initialized, don't create again
-        if (this.initialized && document.querySelector('.terminal-side-container')) {
-            return;
-        }
-        
-        // If no container is provided, exit early
-        if (!container) {
-            console.error('No container provided for WaveAnimation.create');
-            return;
-        }
-        
-        // Mark as initialized
-        this.initialized = true;
-        
+    create(terminal) {
         const waveChars = [
             'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 
             'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 
@@ -209,12 +182,12 @@ const WaveAnimation = {
             svg.setAttribute('width', '300');
             svg.setAttribute('height', `${window.innerHeight}`);
             svg.setAttribute('viewBox', `0 0 300 ${window.innerHeight}`);
-            svg.style.width = '100%';
+            svg.style.width = '300px';
             svg.style.height = '100%';
             svgContainer.appendChild(svg);
 
             const numRows = Math.max(40, Math.ceil(window.innerHeight / 25));
-            const numCols = this.getColumnCount(); // Responsive column count
+            const numCols = 12; 
             const cellWidth = 25;
             const cellHeight = 25;
 
@@ -237,8 +210,7 @@ const WaveAnimation = {
                     text.setAttribute('x', `${x * cellWidth}`);
                     text.setAttribute('y', `${y * cellHeight}`);
                     text.setAttribute('font-family', 'Share Tech Mono');
-                    // Larger font size for mobile
-                    text.setAttribute('font-size', isMobileView ? '14' : '18');
+                    text.setAttribute('font-size', '18');
                     text.setAttribute('fill', 'white');
                     
                     // Initialize with random character or space
@@ -344,24 +316,7 @@ const WaveAnimation = {
             };
 
             try {
-                // Create a dedicated container for side boxes if it doesn't exist
-                let sideContainer = document.querySelector('.terminal-side-container.' + side);
-                if (!sideContainer) {
-                    sideContainer = document.createElement('div');
-                    sideContainer.className = 'terminal-side-container ' + side;
-                    sideContainer.style.position = 'fixed';
-                    sideContainer.style.top = '0';
-                    sideContainer.style[side] = '0';
-                    sideContainer.style.height = '100%';
-                    sideContainer.style.width = isMobileView ? '50px' : '300px';
-                    sideContainer.style.display = 'grid';
-                    sideContainer.style.gridTemplateColumns = `repeat(${this.getColumnCount()}, 1fr)`;
-                    sideContainer.style.alignContent = 'center';
-                    sideContainer.style.zIndex = '1500';
-                    sideContainer.style.pointerEvents = 'none';
-                    document.body.appendChild(sideContainer);
-                }
-                sideContainer.appendChild(sideBox);
+                terminal.appendChild(sideBox);
                 requestAnimationFrame(animateWave);
             } catch (error) {
                 console.error('SVG Side Box Append Error:', error);
@@ -442,7 +397,7 @@ const CursorIndicator = {
 window.currentLanguage = 'en';
 
 const CONFIG = {
-    version: 'v.0.9',
+    version: 'v.0.7',
     username: 'anonymous',
     hostname: 'simplets',
     availableCommands: [
@@ -1182,6 +1137,8 @@ const TerminalInput = {
 // Main Initialization
 // =====================
 document.addEventListener('DOMContentLoaded', () => {
+    // Add loading class to body
+    document.body.classList.add('loading');
     const asciiArt = `
  _______ _____ _______  _____         _______ _______ _______
  |______   |   |  |  | |_____] |      |______    |    |______
@@ -1196,8 +1153,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const terminal = document.getElementById('terminal');
     const terminalInput = document.getElementById('terminal-input');
     const terminalInputArea = document.getElementById('terminal-input-area');
+    const mobileLogo = document.getElementById('mobile-logo');
 
     asciiArtElement.textContent = asciiArt;
+
+    // Add event listener for mobile logo click
+    if (mobileLogo) {
+        mobileLogo.addEventListener('click', handleMobileLogoClick);
+    }
 
     const animateLoadingScreen = () => {
         setTimeout(() => {
@@ -1254,14 +1217,16 @@ function handleTerminalLogoClick() {
     terminalOutput.scrollTop = scrollTop;
 }
 
-// Helper function to set up the terminal interface after loading
-function isMobile() {
-    return window.innerWidth <= 768 || /Mobi|Android/i.test(navigator.userAgent);
+// Helper function for mobile logo click
+function handleMobileLogoClick() {
+    document.body.classList.toggle('dark-theme');
+    document.body.classList.toggle('light-theme');
 }
 
+// Helper function to set up the terminal interface after loading
 function setupTerminalInterface() {
     loadingScreen.style.display = 'none';
-    // Desktop: show welcome message as usual
+
     const welcomeMessage = Utils.createElement('div', ['welcome-line']);
     welcomeMessage.innerHTML = getTranslation('welcome');
     terminalOutput.appendChild(welcomeMessage);
@@ -1305,144 +1270,18 @@ function setupTerminalInterface() {
     }, 500);
 }
 
-// Simple function to create animation boxes specifically for mobile
-function createMobileAnimationBoxes() {
-    // Clear any existing animation boxes
-    const existingContainers = document.querySelectorAll('.mobile-side-container');
-    existingContainers.forEach(container => container.remove());
-    
-    // Create left and right containers
-    ['left', 'right'].forEach(side => {
-        // Create container
-        const container = document.createElement('div');
-        container.className = `mobile-side-container ${side}`;
-        container.style.position = 'fixed';
-        container.style.top = '0';
-        container.style[side] = '0';
-        container.style.height = '100%';
-        container.style.width = '40px';
-        container.style.display = 'flex';
-        container.style.flexDirection = 'column';
-        container.style.justifyContent = 'space-around';
-        container.style.zIndex = '1500';
-        container.style.pointerEvents = 'none';
-        
-        // Create exactly 2 columns of boxes
-        for (let i = 0; i < 20; i++) { // Create 20 boxes vertically
-            const row = document.createElement('div');
-            row.style.display = 'flex';
-            row.style.justifyContent = 'space-around';
-            row.style.width = '100%';
-            
-            // Create 2 boxes per row
-            for (let j = 0; j < 2; j++) {
-                const box = document.createElement('div');
-                box.className = 'mobile-animation-box';
-                box.style.width = '15px';
-                box.style.height = '15px';
-                box.style.margin = '2px';
-                box.style.display = 'flex';
-                box.style.alignItems = 'center';
-                box.style.justifyContent = 'center';
-                box.style.color = 'var(--text-color, #fff)';
-                box.style.opacity = Math.random() * 0.5 + 0.3; // Random opacity between 0.3 and 0.8
-                
-                // Random character
-                const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!?=*#$';
-                box.textContent = chars[Math.floor(Math.random() * chars.length)];
-                
-                row.appendChild(box);
-            }
-            
-            container.appendChild(row);
-        }
-        
-        document.body.appendChild(container);
-    });
-    
-    // Add animation to make characters change
-    setInterval(() => {
-        const boxes = document.querySelectorAll('.mobile-animation-box');
-        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!?=*#$';
-        
-        // Randomly change some characters
-        boxes.forEach(box => {
-            if (Math.random() < 0.05) { // 5% chance to change
-                box.textContent = chars[Math.floor(Math.random() * chars.length)];
-                box.style.opacity = Math.random() * 0.5 + 0.3;
-            }
-        });
-    }, 500);
-}
-
-const transitionToTerminalOrMobile = () => {
+const transitionToTerminal = () => {
     clearInterval(loadingInterval);
     loadingScreen.classList.add('fade-out');
     setTimeout(() => {
-        loadingScreen.style.display = 'none';
-        if (isMobile()) {
-            // Hide terminal but create animation boxes for mobile
-            const terminal = document.getElementById('terminal');
-            if (terminal) terminal.style.display = 'none';
-            
-            // Create mobile message with better formatting
-            let mobileMsg = document.getElementById('mobile-message');
-            if (!mobileMsg) {
-                mobileMsg = document.createElement('div');
-                mobileMsg.id = 'mobile-message';
-                
-                // Create a container for better formatting
-                const msgContent = document.createElement('div');
-                msgContent.className = 'mobile-message-content';
-                msgContent.innerHTML = `
-                    <div class="mobile-header">
-                        <strong>SIMPLETS is the cult of digital awakening</strong>
-                    </div>
-                    <div class="mobile-body">
-                        An underground and experimental DeSoc journey.<br>
-                        Designed around free speech and pseudonym friendly values.<br>
-                        A convergence where A.I. and creative souls unite.<br>
-                        Built by codes, from character to character.
-                    </div>
-                    <div class="mobile-footer">
-                        <em>For the full CLI experience, please open this site on a desktop device.</em>
-                    </div>
-                `;
-                
-                // Robust inline style for mobile message
-                mobileMsg.style.position = 'fixed';
-                mobileMsg.style.top = '0';
-                mobileMsg.style.left = '0';
-                mobileMsg.style.width = '100vw';
-                mobileMsg.style.height = '100vh';
-                mobileMsg.style.zIndex = '2000';
-                mobileMsg.style.background = 'var(--bg-color, #000)';
-                mobileMsg.style.color = 'var(--text-color, #fff)';
-                mobileMsg.style.display = 'flex';
-                mobileMsg.style.flexDirection = 'column';
-                mobileMsg.style.alignItems = 'center';
-                mobileMsg.style.justifyContent = 'center';
-                mobileMsg.style.textAlign = 'center';
-                mobileMsg.style.padding = '32px 16px';
-                mobileMsg.style.fontSize = '1.1em';
-                mobileMsg.style.overflow = 'auto';
-                
-                mobileMsg.appendChild(msgContent);
-                document.body.appendChild(mobileMsg);
-            } else {
-                mobileMsg.style.display = 'flex';
-            }
-            
-            // Create a simpler, guaranteed-to-work animation for mobile
-            createMobileAnimationBoxes();
-        } else {
-            setupTerminalInterface();
-        }
+        setupTerminalInterface();
+        // Remove loading class from body
+        document.body.classList.remove('loading');
     }, 1000);
 };
 
-setTimeout(transitionToTerminalOrMobile, 4000);
+    setTimeout(transitionToTerminal, 4000);
 
-const versionDiv = document.getElementById('version-display');
-if (versionDiv) versionDiv.textContent = `Version: ${CONFIG.version}`;
+    const versionDiv = document.getElementById('version-display');
+    if (versionDiv) versionDiv.textContent = `Version: ${CONFIG.version}`;
 });
