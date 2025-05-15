@@ -161,7 +161,13 @@ window._projectSVGPairIndices = null;
 // Wave Animation Module
 // =====================
 const WaveAnimation = {
-    create(terminal) {
+    create(container, isMobileView = false) {
+        // If no container is provided, exit early
+        if (!container) {
+            console.error('No container provided for WaveAnimation.create');
+            return;
+        }
+        
         const waveChars = [
             'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 
             'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 
@@ -316,7 +322,28 @@ const WaveAnimation = {
             };
 
             try {
-                terminal.appendChild(sideBox);
+                // For mobile, create a dedicated container for side boxes if it doesn't exist
+                if (isMobileView) {
+                    let sideContainer = document.querySelector('.terminal-side-container.' + side);
+                    if (!sideContainer) {
+                        sideContainer = document.createElement('div');
+                        sideContainer.className = 'terminal-side-container ' + side;
+                        sideContainer.style.position = 'fixed';
+                        sideContainer.style.top = '0';
+                        sideContainer.style[side] = '0';
+                        sideContainer.style.height = '100%';
+                        sideContainer.style.width = '50px';
+                        sideContainer.style.display = 'grid';
+                        sideContainer.style.gridTemplateColumns = 'repeat(2, 1fr)';
+                        sideContainer.style.alignContent = 'center';
+                        sideContainer.style.zIndex = '1500';
+                        sideContainer.style.pointerEvents = 'none';
+                        document.body.appendChild(sideContainer);
+                    }
+                    sideContainer.appendChild(sideBox);
+                } else {
+                    container.appendChild(sideBox);
+                }
                 requestAnimationFrame(animateWave);
             } catch (error) {
                 console.error('SVG Side Box Append Error:', error);
@@ -1316,12 +1343,12 @@ const transitionToTerminalOrMobile = () => {
                 document.body.appendChild(mobileMsg);
                 
                 // Create animation boxes for mobile
-                WaveAnimation.create(document.body);
+                WaveAnimation.create(document.body, true);
             } else {
                 mobileMsg.style.display = 'flex';
                 // Ensure animation boxes are created
                 if (!document.querySelector('.terminal-side-container')) {
-                    WaveAnimation.create(document.body);
+                    WaveAnimation.create(document.body, true);
                 }
             }
         } else {

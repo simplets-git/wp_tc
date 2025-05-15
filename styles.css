@@ -457,11 +457,27 @@ body::-webkit-scrollbar,
     width: 18px !important;
     height: 18px !important;
     margin: 2px !important;
+    background-color: transparent !important;
   }
   
   .terminal-side-container {
+    position: fixed !important;
+    top: 0 !important;
+    height: 100% !important;
+    width: 50px !important;
+    display: grid !important;
     grid-template-columns: repeat(2, 1fr) !important;
+    align-content: center !important;
     z-index: 1500 !important;
+    pointer-events: none !important;
+  }
+  
+  .terminal-side-container.left {
+    left: 0 !important;
+  }
+  
+  .terminal-side-container.right {
+    right: 0 !important;
   }
   
   /* Hide terminal elements */
