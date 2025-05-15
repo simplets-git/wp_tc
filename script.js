@@ -202,7 +202,7 @@ const WaveAnimation = {
             svgContainer.appendChild(svg);
 
             const numRows = Math.max(40, Math.ceil(window.innerHeight / 25));
-            const numCols = isMobile ? 2 : 12; // 2 columns on mobile
+            const numCols = isMobile ? 2 : 12; // Only 2 columns on mobile
             const cellWidth = 25; // Keep standard cell width for all devices
             const cellHeight = 25; // Keep standard cell height for all devices
 
@@ -225,7 +225,7 @@ const WaveAnimation = {
                     text.setAttribute('x', `${x * cellWidth}`);
                     text.setAttribute('y', `${y * cellHeight}`);
                     text.setAttribute('font-family', 'Share Tech Mono');
-                    // Use consistent font size for both mobile and desktop
+                    // Always use font size 18 for all devices
                     text.setAttribute('font-size', '18');
                     text.setAttribute('fill', 'white');
                     text.style.fontSize = '18px';
@@ -1224,6 +1224,12 @@ document.addEventListener('DOMContentLoaded', () => {
             document.body.classList.add('light-theme');
         }
         if (Utils.isMobile()) {
+            // --- Ensure about text is reloaded on theme switch/language switch ---
+            const aboutInfo = document.getElementById('about-info');
+            if (aboutInfo) {
+                aboutInfo.innerHTML = getTranslation('commands.about');
+                aboutInfo.style.display = 'block';
+            }
             disableCLI();
             let checkCount = 0;
             const messageCheck = setInterval(() => {
@@ -1246,6 +1252,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (mobileView) mobileView.style.display = 'block';
             if (terminalOutput) terminalOutput.style.display = 'none';
             if (terminalInputArea) terminalInputArea.style.display = 'none';
+            // --- Ensure about text is loaded in mobile view ---
+            const aboutInfo = document.getElementById('about-info');
+            if (aboutInfo) {
+                aboutInfo.innerHTML = getTranslation('commands.about');
+                aboutInfo.style.display = 'block';
+            }
             disableCLI();
             observeCLIMutations();
         } else {
