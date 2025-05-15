@@ -1195,35 +1195,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     animateLoadingScreen();
 
-    // Check if we're on mobile
-    if (window.innerWidth <= 768) {
-        // Mobile devices - show loading animation and then mobile view
+    // For desktop only, proceed with terminal initialization after delay
+    if (window.innerWidth > 768) {
         setTimeout(() => {
             clearInterval(loadingInterval);
-            
-            // First, make sure loading screen is visible
-            loadingScreen.style.display = 'flex';
-            loadingScreen.style.opacity = '1';
-            loadingScreen.style.pointerEvents = 'auto';
-            
-            // Then fade it out
+            loadingScreen.classList.add('fade-out');
             setTimeout(() => {
-                loadingScreen.classList.add('fade-out');
-                loadingScreen.style.pointerEvents = 'none';
-            }, 100);
-            
-            // Show mobile view after fade-out animation
-            setTimeout(() => {
-                if (mobileView) {
-                    mobileView.classList.add('visible');
-                    document.body.classList.remove('loading');
-                }
-            }, 1100);
+                setupTerminalInterface();
+                document.body.classList.remove('loading');
+            }, 1000);
         }, 4000);
     } else {
-        // Desktop - proceed with normal terminal initialization
+        // For mobile, just hide the loading screen after animation
         setTimeout(() => {
-            transitionToTerminal();
+            clearInterval(loadingInterval);
+            loadingScreen.style.display = 'none';
+            document.body.classList.remove('loading');
         }, 4000);
     }
 
@@ -1303,21 +1290,7 @@ function setupTerminalInterface() {
     }, 500);
 }
 
-const transitionToTerminal = () => {
-    clearInterval(loadingInterval);
-    loadingScreen.classList.add('fade-out');
-    
-    // For desktop only, proceed with terminal initialization
-    if (window.innerWidth > 768) {
-        setTimeout(() => {
-            setupTerminalInterface();
-            document.body.classList.remove('loading');
-        }, 1000);
-    }
-};
-
-    setTimeout(transitionToTerminal, 4000);
-
+    // Set version display
     const versionDiv = document.getElementById('version-display');
     if (versionDiv) versionDiv.textContent = `Version: ${CONFIG.version}`;
 });
