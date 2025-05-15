@@ -1158,7 +1158,31 @@ const TerminalInput = {
 // =====================
 // Main Initialization
 // =====================
+// Initialize mobile view content immediately
+function initializeMobileView() {
+    const mobileView = document.getElementById('mobile-view');
+    const aboutInfo = document.getElementById('about-info');
+    
+    if (mobileView && aboutInfo) {
+        // Set about info content
+        try {
+            aboutInfo.innerHTML = getTranslation('commands.about');
+        } catch (e) {
+            // Fallback if translation isn't available
+            aboutInfo.innerHTML = "SIMPLETS is a minimalist terminal interface for exploring projects and ideas.";
+        }
+        
+        // Make mobile view visible
+        mobileView.style.display = 'block';
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
+    // Check if mobile and initialize immediately
+    if (window.innerWidth <= 768) {
+        initializeMobileView();
+    }
+    
     // Enhanced mobile detection function with complete CLI hiding
     const checkMobileView = () => {
         const isMobile = window.innerWidth <= 768;
@@ -1395,7 +1419,35 @@ document.addEventListener('DOMContentLoaded', () => {
         textIndex = (textIndex + 1) % loadingTexts.length;
     }, 1500);
 
-    animateLoadingScreen();
+    // Check if mobile and handle loading differently
+    const isMobileDevice = window.innerWidth <= 768;
+    if (isMobileDevice) {
+        // For mobile, skip the loading animation and show content immediately
+        setTimeout(() => {
+            const loadingScreen = document.getElementById('loading-screen');
+            if (loadingScreen) {
+                loadingScreen.classList.add('fade-out');
+                setTimeout(() => {
+                    loadingScreen.style.display = 'none';
+                    
+                    // Make sure mobile view is visible
+                    const mobileView = document.getElementById('mobile-view');
+                    if (mobileView) {
+                        mobileView.style.display = 'block';
+                    }
+                    
+                    // Clear the interval
+                    clearInterval(loadingInterval);
+                    
+                    // Force check mobile view
+                    checkMobileView();
+                }, 500);
+            }
+        }, 1000);
+    } else {
+        // For desktop, use the normal animation
+        animateLoadingScreen();
+    }
 
 // Helper function for terminal logo click
 function handleTerminalLogoClick() {
