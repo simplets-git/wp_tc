@@ -212,8 +212,10 @@ const WaveAnimation = {
                     text.setAttribute('x', `${x * cellWidth}`);
                     text.setAttribute('y', `${y * cellHeight}`);
                     text.setAttribute('font-family', 'Share Tech Mono');
-                    text.setAttribute('font-size', '18');
+                    // Ensure font size is large enough on mobile
+                    text.setAttribute('font-size', isMobile ? '24' : '18');
                     text.setAttribute('fill', 'white');
+                    text.setAttribute('font-weight', isMobile ? 'bold' : 'normal');
                     
                     // Initialize with random character or space
                     const isSpace = Math.random() > 0.6; // 40% chance of character initially
@@ -1145,6 +1147,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const mobileView = document.getElementById('mobile-view');
         const terminalOutput = document.getElementById('terminal-output');
         const terminalInputArea = document.getElementById('terminal-input-area');
+        const welcomeMessage = document.querySelector('.welcome-message');
         
         if (isMobile) {
             // Setup mobile view
@@ -1158,7 +1161,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Ensure animations are properly sized
             const sideBoxes = document.querySelectorAll('.terminal-side-box');
             sideBoxes.forEach(box => {
-                box.style.width = '25px'; // Narrower on mobile
+                box.style.width = '30px'; // Slightly wider for better visibility
             });
             
             // Hide CLI elements on mobile
@@ -1166,15 +1169,36 @@ document.addEventListener('DOMContentLoaded', () => {
                 el.style.display = 'none';
             });
             
-            // Disable terminal input on mobile
+            // Hide welcome message on mobile
+            if (welcomeMessage) {
+                welcomeMessage.style.display = 'none';
+            }
+            
+            // Completely disable terminal input on mobile
             if (terminalInputArea) {
                 terminalInputArea.style.display = 'none';
             }
             
             // Hide any CLI messages that might have been displayed
-            document.querySelectorAll('.command-output').forEach(el => {
+            document.querySelectorAll('.command-output, .message').forEach(el => {
                 el.style.display = 'none';
             });
+            
+            // Override theme toggle function on mobile to prevent CLI messages
+            window.originalToggleTheme = window.toggleTheme;
+            window.toggleTheme = function() {
+                const currentTheme = document.body.classList.contains('light-theme') ? 'light' : 'dark';
+                const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+                
+                if (currentTheme === 'light') {
+                    document.body.classList.remove('light-theme');
+                } else {
+                    document.body.classList.add('light-theme');
+                }
+                
+                // Don't add CLI message on mobile
+                return false;
+            };
         } else {
             // Reset to desktop view if needed
             if (mobileView.style.display === 'block') {
@@ -1192,9 +1216,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 
                 // Show CLI messages again
-                document.querySelectorAll('.command-output').forEach(el => {
+                document.querySelectorAll('.command-output, .message').forEach(el => {
                     el.style.display = 'block';
                 });
+                
+                // Show welcome message again if it exists
+                if (welcomeMessage) {
+                    welcomeMessage.style.display = 'block';
+                }
+                
+                // Restore original theme toggle function
+                if (window.originalToggleTheme) {
+                    window.toggleTheme = window.originalToggleTheme;
+                }
             }
         }
     };
