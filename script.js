@@ -1266,20 +1266,34 @@ const transitionToTerminalOrMobile = () => {
     setTimeout(() => {
         loadingScreen.style.display = 'none';
         if (isMobile()) {
+            // Hide terminal but create animation boxes for mobile
             const terminal = document.getElementById('terminal');
             if (terminal) terminal.style.display = 'none';
+            
+            // Create mobile message with better formatting
             let mobileMsg = document.getElementById('mobile-message');
             if (!mobileMsg) {
                 mobileMsg = document.createElement('div');
                 mobileMsg.id = 'mobile-message';
-                mobileMsg.innerHTML = `
-                    <strong>SIMPLETS is the cult of digital awakening:</strong><br>
-                    An underground and experimental DeSoc journey.<br>
-                    Designed around free speech and pseudonym friendly values.<br>
-                    A convergence where A.I. and creative souls unite.<br>
-                    Built by codes, from character to character.<br><br>
-                    <em>For the full CLI experience, please open this site on a desktop device.</em>
+                
+                // Create a container for better formatting
+                const msgContent = document.createElement('div');
+                msgContent.className = 'mobile-message-content';
+                msgContent.innerHTML = `
+                    <div class="mobile-header">
+                        <strong>SIMPLETS is the cult of digital awakening</strong>
+                    </div>
+                    <div class="mobile-body">
+                        An underground and experimental DeSoc journey.<br>
+                        Designed around free speech and pseudonym friendly values.<br>
+                        A convergence where A.I. and creative souls unite.<br>
+                        Built by codes, from character to character.
+                    </div>
+                    <div class="mobile-footer">
+                        <em>For the full CLI experience, please open this site on a desktop device.</em>
+                    </div>
                 `;
+                
                 // Robust inline style for mobile message
                 mobileMsg.style.position = 'fixed';
                 mobileMsg.style.top = '0';
@@ -1287,17 +1301,28 @@ const transitionToTerminalOrMobile = () => {
                 mobileMsg.style.width = '100vw';
                 mobileMsg.style.height = '100vh';
                 mobileMsg.style.zIndex = '2000';
-                mobileMsg.style.background = 'var(--bg-color, #fff)';
-                mobileMsg.style.color = 'var(--text-color, #111)';
+                mobileMsg.style.background = 'var(--bg-color, #000)';
+                mobileMsg.style.color = 'var(--text-color, #fff)';
                 mobileMsg.style.display = 'flex';
+                mobileMsg.style.flexDirection = 'column';
                 mobileMsg.style.alignItems = 'center';
                 mobileMsg.style.justifyContent = 'center';
                 mobileMsg.style.textAlign = 'center';
                 mobileMsg.style.padding = '32px 16px';
                 mobileMsg.style.fontSize = '1.1em';
+                mobileMsg.style.overflow = 'auto';
+                
+                mobileMsg.appendChild(msgContent);
                 document.body.appendChild(mobileMsg);
+                
+                // Create animation boxes for mobile
+                WaveAnimation.create(document.body);
             } else {
                 mobileMsg.style.display = 'flex';
+                // Ensure animation boxes are created
+                if (!document.querySelector('.terminal-side-container')) {
+                    WaveAnimation.create(document.body);
+                }
             }
         } else {
             setupTerminalInterface();
