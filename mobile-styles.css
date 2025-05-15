@@ -46,7 +46,7 @@
 /* Show mobile view on small screens */
 @media (max-width: 768px) {
     .mobile-view {
-        display: flex;
+        display: none;
         position: fixed;
         top: 0;
         left: 0;
@@ -59,18 +59,21 @@
         display: none;
     }
     
-    /* Keep loading screen visible on mobile */
+    /* Show loading screen on mobile */
     #loading-screen {
-        z-index: 2001; /* Higher than mobile view */
+        display: flex;
         position: fixed;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
+        z-index: 2000;
     }
     
-    /* Show loading screen on mobile */
-    #loading-screen {
-        display: flex !important;
+    /* Show mobile view after loading */
+    .mobile-view.show {
+        display: flex;
+        opacity: 1;
+        transform: scale(1);
     }
 }

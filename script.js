@@ -1154,6 +1154,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const terminalInput = document.getElementById('terminal-input');
     const terminalInputArea = document.getElementById('terminal-input-area');
     const mobileLogo = document.getElementById('mobile-logo');
+    const mobileView = document.querySelector('.mobile-view');
 
     asciiArtElement.textContent = asciiArt;
 
@@ -1161,6 +1162,19 @@ document.addEventListener('DOMContentLoaded', () => {
     if (mobileLogo) {
         mobileLogo.addEventListener('click', handleMobileLogoClick);
     }
+
+    // Function to handle mobile view initialization
+    const initMobileView = () => {
+        // Hide loading screen
+        loadingScreen.classList.add('fade-out');
+        
+        // Show mobile view after fade-out animation
+        setTimeout(() => {
+            if (mobileView) {
+                mobileView.classList.add('show');
+            }
+        }, 1000);
+    };
 
     const animateLoadingScreen = () => {
         setTimeout(() => {
@@ -1193,6 +1207,22 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 1500);
 
     animateLoadingScreen();
+
+    // Check if we're on mobile and initialize mobile view
+    if (window.innerWidth <= 768) {
+        setTimeout(() => {
+            initMobileView();
+            // Remove loading class after mobile view is shown
+            setTimeout(() => {
+                document.body.classList.remove('loading');
+            }, 2500);
+        }, 4000);
+    } else {
+        // For desktop, proceed with normal terminal initialization
+        setTimeout(() => {
+            transitionToTerminal();
+        }, 4000);
+    };
 
 // Helper function for terminal logo click
 function handleTerminalLogoClick() {
@@ -1274,30 +1304,13 @@ const transitionToTerminal = () => {
     clearInterval(loadingInterval);
     loadingScreen.classList.add('fade-out');
     
-    // For mobile devices, wait for fade-out animation to complete
-    const isMobile = window.innerWidth <= 768;
-    const transitionDuration = isMobile ? 1500 : 1000;
-    
-    setTimeout(() => {
-        if (isMobile) {
-            // Show mobile view after loading animation
-            const mobileView = document.querySelector('.mobile-view');
-            if (mobileView) {
-                mobileView.style.opacity = '0';
-                mobileView.style.transform = 'scale(0.95)';
-                mobileView.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-                
-                setTimeout(() => {
-                    mobileView.style.opacity = '1';
-                    mobileView.style.transform = 'scale(1)';
-                }, 100);
-            }
-        } else {
+    // For desktop only, proceed with terminal initialization
+    if (window.innerWidth > 768) {
+        setTimeout(() => {
             setupTerminalInterface();
-        }
-        // Remove loading class from body
-        document.body.classList.remove('loading');
-    }, transitionDuration);
+            document.body.classList.remove('loading');
+        }, 1000);
+    }
 };
 
     setTimeout(transitionToTerminal, 4000);
