@@ -3,9 +3,6 @@ console.log('SCRIPT.JS LOADED');
 // Utility Functions
 // =====================
 const Utils = {
-    isMobile() {
-        return window.innerWidth <= 768;
-    },
     focusAndSetCursorAtEnd(element) {
         if (!element) return;
         // Remove all child nodes except text (should only be text)
@@ -177,34 +174,22 @@ const WaveAnimation = {
         ];
 
         const createSVGWave = (side) => {
-            // First detect mobile BEFORE using it
-            const isMobile = window.innerWidth < 768;
-            
             const sideBox = Utils.createElement('div', ['terminal-side-box', side]);
             const svgContainer = Utils.createElement('div', ['terminal-side-animation']);
             sideBox.appendChild(svgContainer);
 
             const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-            // Adjust SVG attributes for mobile
-            if (isMobile) {
-                svg.setAttribute('width', '50');
-                svg.setAttribute('height', `${window.innerHeight}`);
-                svg.setAttribute('viewBox', `0 0 50 ${window.innerHeight}`);
-                svg.style.width = '50px';
-                svg.style.height = '100%';
-            } else {
-                svg.setAttribute('width', '300');
-                svg.setAttribute('height', `${window.innerHeight}`);
-                svg.setAttribute('viewBox', `0 0 300 ${window.innerHeight}`);
-                svg.style.width = '300px';
-                svg.style.height = '100%';
-            }
+            svg.setAttribute('width', '300');
+            svg.setAttribute('height', `${window.innerHeight}`);
+            svg.setAttribute('viewBox', `0 0 300 ${window.innerHeight}`);
+            svg.style.width = '300px';
+            svg.style.height = '100%';
             svgContainer.appendChild(svg);
 
             const numRows = Math.max(40, Math.ceil(window.innerHeight / 25));
-            const numCols = isMobile ? 2 : 12; // Only 2 columns on mobile
-            const cellWidth = 25; // Keep standard cell width for all devices
-            const cellHeight = 25; // Keep standard cell height for all devices
+            const numCols = 12; 
+            const cellWidth = 25;
+            const cellHeight = 25;
 
             const gradientIntensities = [];
             for (let x = 0; x < numCols; x++) {
@@ -225,10 +210,8 @@ const WaveAnimation = {
                     text.setAttribute('x', `${x * cellWidth}`);
                     text.setAttribute('y', `${y * cellHeight}`);
                     text.setAttribute('font-family', 'Share Tech Mono');
-                    // Always use font size 18 for all devices
                     text.setAttribute('font-size', '18');
                     text.setAttribute('fill', 'white');
-                    text.style.fontSize = '18px';
                     
                     // Initialize with random character or space
                     const isSpace = Math.random() > 0.6; // 40% chance of character initially
@@ -414,7 +397,7 @@ const CursorIndicator = {
 window.currentLanguage = 'en';
 
 const CONFIG = {
-    version: 'v.0.7',
+    version: 'v.0.9',
     username: 'anonymous',
     hostname: 'simplets',
     availableCommands: [
@@ -1154,133 +1137,6 @@ const TerminalInput = {
 // Main Initialization
 // =====================
 document.addEventListener('DOMContentLoaded', () => {
-    // --- Mobile CLI helpers (moved out for reuse) ---
-    function hideElements(selectors) {
-        selectors.forEach(sel => {
-            document.querySelectorAll(sel).forEach(el => {
-                el.style.display = 'none';
-                el.style.visibility = 'hidden';
-            });
-        });
-    }
-    function showElements(selectors, display = 'flex') {
-        selectors.forEach(sel => {
-            document.querySelectorAll(sel).forEach(el => {
-                el.style.display = display;
-                el.style.visibility = 'visible';
-            });
-        });
-    }
-    function disableCLI() {
-        hideElements(['.welcome-message']);
-        document.querySelectorAll('.message').forEach(el => {
-            if (el && el.textContent && el.textContent.includes('Welcome to the abyss')) {
-                el.style.display = 'none';
-                el.style.visibility = 'hidden';
-            }
-        });
-        hideElements([
-            '.prompt-line',
-            '.command-output',
-            '.command-line',
-            '.cursor-indicator',
-            '.terminal-menu',
-            '.terminal-input-area',
-            '#terminal-input-area',
-        ]);
-    }
-    function enableCLI() {
-        showElements([
-            '.prompt-line',
-            '.command-line',
-            '.cursor-indicator',
-            '.terminal-input-area',
-            '#terminal-input-area',
-        ]);
-        document.querySelectorAll('.command-output, .message, .welcome-message').forEach(el => {
-            el.style.display = 'block';
-            el.style.visibility = 'visible';
-        });
-    }
-    // --- End helpers ---
-
-    // --- MutationObserver for mobile CLI hiding ---
-    let mutationObserver = null;
-    function observeCLIMutations() {
-        if (mutationObserver) mutationObserver.disconnect();
-        mutationObserver = new MutationObserver(() => {
-            if (Utils.isMobile()) disableCLI();
-        });
-        mutationObserver.observe(document.body, { childList: true, subtree: true });
-    }
-    // --- End observer ---
-
-    // --- Theme toggle override for mobile ---
-    window.toggleTheme = function() {
-        const currentTheme = document.body.classList.contains('light-theme') ? 'light' : 'dark';
-        if (currentTheme === 'light') {
-            document.body.classList.remove('light-theme');
-        } else {
-            document.body.classList.add('light-theme');
-        }
-        if (Utils.isMobile()) {
-            // --- Ensure about text is reloaded on theme switch/language switch ---
-            const aboutInfo = document.getElementById('about-info');
-            if (aboutInfo) {
-                aboutInfo.innerHTML = getTranslation('commands.about');
-                aboutInfo.style.display = 'block';
-            }
-            disableCLI();
-            let checkCount = 0;
-            const messageCheck = setInterval(() => {
-                disableCLI();
-                checkCount++;
-                if (checkCount > 5) clearInterval(messageCheck);
-            }, 100);
-        }
-        return false;
-    };
-    // --- End theme toggle ---
-
-    // --- Main mobile/desktop view switch ---
-    const setupMobileView = () => {
-        const isMobile = Utils.isMobile();
-        const mobileView = document.getElementById('mobile-view');
-        const terminalOutput = document.getElementById('terminal-output');
-        const terminalInputArea = document.getElementById('terminal-input-area');
-        if (isMobile) {
-            if (mobileView) mobileView.style.display = 'block';
-            if (terminalOutput) terminalOutput.style.display = 'none';
-            if (terminalInputArea) terminalInputArea.style.display = 'none';
-            // --- Ensure about text is loaded in mobile view ---
-            const aboutInfo = document.getElementById('about-info');
-            if (aboutInfo) {
-                aboutInfo.innerHTML = getTranslation('commands.about');
-                aboutInfo.style.display = 'block';
-            }
-            disableCLI();
-            observeCLIMutations();
-        } else {
-            if (mobileView) mobileView.style.display = 'none';
-            if (terminalOutput) terminalOutput.style.display = 'block';
-            if (terminalInputArea) terminalInputArea.style.display = 'flex';
-            enableCLI();
-            if (mutationObserver) mutationObserver.disconnect();
-        }
-    };
-    
-    // Initial check
-    setupMobileView();
-    
-    // Listen for orientation changes and resizes
-    window.addEventListener('resize', () => {
-        setupMobileView();
-    });
-    
-    // Listen for orientation change on mobile devices
-    window.addEventListener('orientationchange', () => {
-        setTimeout(setupMobileView, 100);
-    });
     const asciiArt = `
  _______ _____ _______  _____         _______ _______ _______
  |______   |   |  |  | |_____] |      |______    |    |______
@@ -1354,9 +1210,36 @@ function handleTerminalLogoClick() {
 }
 
 // Helper function to set up the terminal interface after loading
+function isMobile() {
+    return window.innerWidth <= 768 || /Mobi|Android/i.test(navigator.userAgent);
+}
+
 function setupTerminalInterface() {
     loadingScreen.style.display = 'none';
 
+    // MOBILE: Only show a constant about message and skip welcome/terminal
+    if (isMobile()) {
+        // Hide terminal and show mobile message
+        document.getElementById('terminal').style.display = 'none';
+        let mobileMsg = document.getElementById('mobile-message');
+        if (!mobileMsg) {
+            mobileMsg = document.createElement('div');
+            mobileMsg.id = 'mobile-message';
+            mobileMsg.innerHTML = `
+                <strong>SIMPLETS is the cult of digital awakening:</strong><br>
+                An underground and experimental DeSoc journey.<br>
+                Designed around free speech and pseudonym friendly values.<br>
+                A convergence where A.I. and creative souls unite.<br>
+                Built by codes, from character to character.<br><br>
+                <em>For the full CLI experience, please open this site on a desktop device.</em>
+            `;
+            document.body.appendChild(mobileMsg);
+        } else {
+            mobileMsg.style.display = 'block';
+        }
+        return;
+    }
+    // Desktop: show welcome message as usual
     const welcomeMessage = Utils.createElement('div', ['welcome-line']);
     welcomeMessage.innerHTML = getTranslation('welcome');
     terminalOutput.appendChild(welcomeMessage);
