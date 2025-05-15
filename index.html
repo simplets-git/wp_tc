@@ -8,8 +8,63 @@
     <link rel="stylesheet" href="menu-styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inconsolata:wght@400;700&display=swap" rel="stylesheet">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <style>
+        #mobile-only-view {
+            display: none;
+            padding: 20px;
+            text-align: center;
+            color: white;
+            font-family: 'Inconsolata', monospace;
+            height: 100vh;
+            box-sizing: border-box;
+        }
+        
+        @media (max-width: 768px) {
+            #terminal {
+                display: none !important;
+            }
+            #mobile-only-view {
+                display: block !important;
+            }
+        }
+        
+        #mobile-only-view h1 {
+            margin-top: 40px;
+            font-size: 24px;
+        }
+        
+        #mobile-only-view .about-content {
+            margin: 30px 0;
+            text-align: left;
+            line-height: 1.6;
+        }
+        
+        #mobile-only-view .mobile-warning {
+            margin-top: 30px;
+            padding: 15px;
+            border: 1px solid white;
+            border-radius: 5px;
+        }
+        
+        #mobile-only-view .mobile-note {
+            color: #4CAF50;
+            margin-top: 10px;
+            font-style: italic;
+        }
+    </style>
 </head>
 <body class="dark-theme">
+    <!-- Mobile-only view that completely replaces the terminal on mobile -->
+    <div id="mobile-only-view">
+        <h1>SIMPLETS Terminal</h1>
+        <div class="about-content" id="mobile-about-info"></div>
+        <div class="mobile-warning">
+            <p>This terminal interface is optimized for desktop viewing.</p>
+            <p class="mobile-note">Please open on a desktop device for full functionality.</p>
+        </div>
+    </div>
+
+    <!-- Regular terminal for desktop -->
     <div id="terminal">
         <div id="loading-screen">
             <div id="loading-container">
@@ -18,15 +73,15 @@
             </div>
         </div>
         <div id="terminal-output">
-        <div id="mobile-view" style="display: none;">
-            <h2>SIMPLETS Terminal</h2>
-            <div id="about-info"></div>
-            <div class="mobile-warning">
-                <p>This terminal interface is optimized for desktop viewing.</p>
-                <p class="mobile-note">Please open on a desktop device for full functionality.</p>
+            <div id="mobile-view" style="display: none;">
+                <h2>SIMPLETS Terminal</h2>
+                <div id="about-info"></div>
+                <div class="mobile-warning">
+                    <p>This terminal interface is optimized for desktop viewing.</p>
+                    <p class="mobile-note">Please open on a desktop device for full functionality.</p>
+                </div>
             </div>
         </div>
-    </div>
         <div id="terminal-input-area">
             <span class="prompt">$</span>
             <input type="text" id="terminal-input" autocomplete="off">
@@ -34,6 +89,7 @@
         <div id="version-display" style="position:absolute;bottom:10px;right:20px;color:var(--text-color);font-size:0.95em;opacity:0.7;z-index:10;">Version: v0.4</div>
     </div>
     <script src="translations.js"></script>
+    <script src="mobile.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
