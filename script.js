@@ -186,8 +186,10 @@ const WaveAnimation = {
             svg.style.height = '100%';
             svgContainer.appendChild(svg);
 
+            // Simplified mobile detection - just check screen width
+            const isMobile = window.innerWidth < 768;
             const numRows = Math.max(40, Math.ceil(window.innerHeight / 25));
-            const numCols = isMobile ? 2 : 12; 
+            const numCols = isMobile ? 2 : 12;
             const cellWidth = 25;
             const cellHeight = 25;
 
