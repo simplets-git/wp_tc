@@ -1200,7 +1200,17 @@ document.addEventListener('DOMContentLoaded', () => {
         // Mobile devices - show loading animation and then mobile view
         setTimeout(() => {
             clearInterval(loadingInterval);
-            loadingScreen.classList.add('fade-out');
+            
+            // First, make sure loading screen is visible
+            loadingScreen.style.display = 'flex';
+            loadingScreen.style.opacity = '1';
+            loadingScreen.style.pointerEvents = 'auto';
+            
+            // Then fade it out
+            setTimeout(() => {
+                loadingScreen.classList.add('fade-out');
+                loadingScreen.style.pointerEvents = 'none';
+            }, 100);
             
             // Show mobile view after fade-out animation
             setTimeout(() => {
@@ -1208,7 +1218,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     mobileView.classList.add('visible');
                     document.body.classList.remove('loading');
                 }
-            }, 1000);
+            }, 1100);
         }, 4000);
     } else {
         // Desktop - proceed with normal terminal initialization
