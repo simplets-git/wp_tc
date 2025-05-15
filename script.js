@@ -187,7 +187,7 @@ const WaveAnimation = {
             svgContainer.appendChild(svg);
 
             const numRows = Math.max(40, Math.ceil(window.innerHeight / 25));
-            const numCols = 12; 
+            const numCols = isMobile ? 2 : 12; 
             const cellWidth = 25;
             const cellHeight = 25;
 
