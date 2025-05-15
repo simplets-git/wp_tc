@@ -222,13 +222,13 @@ const WaveAnimation = {
                     text.setAttribute('x', `${x * cellWidth}`);
                     text.setAttribute('y', `${y * cellHeight}`);
                     text.setAttribute('font-family', 'Share Tech Mono');
-                    // Much larger font size for mobile
+                    // Set font size for mobile and desktop
                     if (isMobile) {
-                        text.setAttribute('font-size', '36');
+                        text.setAttribute('font-size', '18');
                         text.setAttribute('fill', 'white');
                         text.setAttribute('font-weight', 'bold');
                         // Force the text to be visible and properly sized
-                        text.style.fontSize = '36px';
+                        text.style.fontSize = '18px';
                         text.style.fontWeight = 'bold';
                     } else {
                         text.setAttribute('font-size', '18');
@@ -1159,49 +1159,44 @@ const TerminalInput = {
 // Main Initialization
 // =====================
 document.addEventListener('DOMContentLoaded', () => {
-    // Enhanced mobile detection function with more thorough cleanup
+    // Enhanced mobile detection function with complete CLI hiding
     const checkMobileView = () => {
         const isMobile = window.innerWidth <= 768;
         const mobileView = document.getElementById('mobile-view');
         const terminalOutput = document.getElementById('terminal-output');
         const terminalInputArea = document.getElementById('terminal-input-area');
         
-        // Function to completely disable CLI on mobile
+        // Function to completely hide and disable CLI on mobile
         const disableCLI = () => {
-            // First, find and hide the welcome message specifically
-            const welcomeMessages = document.querySelectorAll('.welcome-message'); 
-            welcomeMessages.forEach(el => {
-                if (el) el.style.display = 'none';
-            });
-            
-            // Find messages containing welcome text
-            document.querySelectorAll('.message').forEach(el => {
-                if (el && el.textContent && el.textContent.includes('Welcome to the abyss')) {
-                    el.style.display = 'none';
+            // First, empty the terminal output except for the mobile view
+            const children = Array.from(terminalOutput.children);
+            children.forEach(child => {
+                // Keep only the mobile view element
+                if (child.id !== 'mobile-view') {
+                    child.style.display = 'none';
+                    child.style.visibility = 'hidden';
                 }
             });
             
-            // Hide all CLI elements with !important to force hiding
-            document.querySelectorAll('.prompt-line, .command-output, .message').forEach(el => {
+            // Hide all CLI elements
+            document.querySelectorAll('.welcome-message, .prompt-line, .command-output, .message, .cursor-indicator, .command-line').forEach(el => {
                 if (el) {
                     el.style.display = 'none';
                     el.style.visibility = 'hidden';
                 }
             });
             
-            // Disable terminal input
+            // Completely disable terminal input
             if (terminalInputArea) {
                 terminalInputArea.style.display = 'none';
                 terminalInputArea.style.visibility = 'hidden';
             }
             
-            // Hide any other CLI-related elements
-            document.querySelectorAll('.cursor-indicator, .command-line').forEach(el => {
-                if (el) {
-                    el.style.display = 'none';
-                    el.style.visibility = 'hidden';
-                }
-            });
+            // Hide the version display on mobile
+            const versionDisplay = document.getElementById('version-display');
+            if (versionDisplay) {
+                versionDisplay.style.display = 'none';
+            }
         };
         
         if (isMobile) {
@@ -1222,30 +1217,36 @@ document.addEventListener('DOMContentLoaded', () => {
             // Completely disable CLI
             disableCLI();
             
-            // Override theme toggle function on mobile to prevent CLI messages
+            // Completely replace the theme toggle function on mobile
             window.originalToggleTheme = window.toggleTheme;
+            
+            // Create a new direct theme toggle that doesn't use the CLI
             window.toggleTheme = function() {
-                const currentTheme = document.body.classList.contains('light-theme') ? 'light' : 'dark';
-                
-                if (currentTheme === 'light') {
+                // Just toggle the class directly without any CLI interaction
+                if (document.body.classList.contains('light-theme')) {
                     document.body.classList.remove('light-theme');
                 } else {
                     document.body.classList.add('light-theme');
                 }
                 
-                // Immediately hide any new messages that might appear
+                // Run the disableCLI multiple times to catch any new elements
                 disableCLI();
                 
-                // Set up a recurring check to keep hiding messages
-                let checkCount = 0;
-                const messageCheck = setInterval(() => {
-                    disableCLI();
-                    checkCount++;
-                    if (checkCount > 5) clearInterval(messageCheck);
-                }, 100);
+                // Set up recurring cleanup to ensure nothing appears
+                setTimeout(disableCLI, 50);
+                setTimeout(disableCLI, 100);
+                setTimeout(disableCLI, 200);
+                setTimeout(disableCLI, 500);
                 
-                // Don't add CLI message on mobile
+                // Prevent event propagation and default behavior
                 return false;
+            };
+            
+            // Disable the original addMessage function on mobile
+            window.originalAddMessage = TerminalOutput.addMessage;
+            TerminalOutput.addMessage = function() {
+                // Do nothing on mobile to prevent any messages
+                return;
             };
             
             // Disable any other interactive elements
@@ -1296,9 +1297,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     el.style.pointerEvents = 'auto';
                 });
                 
-                // Restore original theme toggle function
+                // Restore original functions
                 if (window.originalToggleTheme) {
                     window.toggleTheme = window.originalToggleTheme;
+                }
+                
+                // Restore original addMessage function
+                if (window.originalAddMessage) {
+                    TerminalOutput.addMessage = window.originalAddMessage;
                 }
                 
                 // Disconnect the observer if it exists
