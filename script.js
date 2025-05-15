@@ -1163,19 +1163,6 @@ document.addEventListener('DOMContentLoaded', () => {
         mobileLogo.addEventListener('click', handleMobileLogoClick);
     }
 
-    // Function to handle mobile view initialization
-    const initMobileView = () => {
-        // Hide loading screen
-        loadingScreen.classList.add('fade-out');
-        
-        // Show mobile view after fade-out animation
-        setTimeout(() => {
-            if (mobileView) {
-                mobileView.classList.add('show');
-            }
-        }, 1000);
-    };
-
     const animateLoadingScreen = () => {
         setTimeout(() => {
             const logo = document.getElementById('logo');
@@ -1208,21 +1195,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
     animateLoadingScreen();
 
-    // Check if we're on mobile and initialize mobile view
+    // Check if we're on mobile
     if (window.innerWidth <= 768) {
+        // Mobile devices - show loading animation and then mobile view
         setTimeout(() => {
-            initMobileView();
-            // Remove loading class after mobile view is shown
+            clearInterval(loadingInterval);
+            loadingScreen.classList.add('fade-out');
+            
+            // Show mobile view after fade-out animation
             setTimeout(() => {
-                document.body.classList.remove('loading');
-            }, 2500);
+                if (mobileView) {
+                    mobileView.style.display = 'flex';
+                    document.body.classList.remove('loading');
+                }
+            }, 1000);
         }, 4000);
     } else {
-        // For desktop, proceed with normal terminal initialization
+        // Desktop - proceed with normal terminal initialization
         setTimeout(() => {
             transitionToTerminal();
         }, 4000);
-    };
+    }
 
 // Helper function for terminal logo click
 function handleTerminalLogoClick() {
